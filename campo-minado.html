@@ -72,7 +72,7 @@
           <main class="game">
               <header>
                   <h1 class="title">Campo Minado <span>♥</span></h1>
-                  <p class="subtitle">Encontre os corações do bem. Evite os corações do mal.</p>
+                  <p class="subtitle">encontre os corações do bem. evite os corações do mal.</p>
               </header>
 
               <section class="controls">
@@ -83,7 +83,7 @@
                           <option value="hard">Difícil · 30×16 · 99 ♥</option>
                       </select>
                   </label>
-                  <button id="toggleFlagBtn" class="primary" style="background: #9b5de5;">Modo: ⛏️ Cavar</button>
+                  <button id="toggleFlagBtn" class="primary" style="background: #9b5de5;">modo: ☭ cavar</button>
                   <button id="newGame" class="primary">♥ Novo jogo</button>
               </section>
 
@@ -399,7 +399,7 @@ const Game = (() => {
         // BOTÃO DE ALTERNAR MODO
         DOM.toggleFlagBtn.addEventListener("click", () => {
             flagModeActive = !flagModeActive;
-            DOM.toggleFlagBtn.textContent = flagModeActive ? "Modo: 🚩 Marcar" : "Modo: ⛏️ Cavar";
+            DOM.toggleFlagBtn.textContent = flagModeActive ? "modo: △ marcar" : "modo: ☭ cavar";
             DOM.toggleFlagBtn.style.background = flagModeActive ? "#ff477e" : "#9b5de5";
         });
     }

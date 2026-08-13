@@ -4,43 +4,50 @@ header('Access-Control-Allow-Origin: *');
 
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
-// Função para ler arquivo JSON
 function get_data($file) {
     if (!file_exists($file)) {
-        file_put_contents($file, '[]'); // Cria vazio se não existir
+        file_put_contents($file, '[]');
     }
     return file_get_contents($file);
 }
 
-// Função para salvar no arquivo JSON
 function save_data($file, $new_item) {
     $data = json_decode(get_data($file), true);
-    if (!is_array($data)) $data = [];
+    if (json_last_error() !== JSON_ERROR_NONE || !is_array($data)) {
+        $data = [];
+    }
     $data[] = $new_item;
     file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
+}
+
+// Sanitização robusta contra injeções
+function sanitize($input) {
+    return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
 }
 
 if ($action === 'get_recados') {
     echo get_data('recados.json');
 } elseif ($action === 'add_recado') {
-    $data = json_decode(file_get_contents('php://input'), true);
-    if ($data && isset($data['texto'])) {
+    $raw = file_get_contents('php://input');
+    $data = json_decode($raw, true);
+    if (json_last_error() === JSON_ERROR_NONE && $data && isset($data['texto'])) {
+        // Sanitiza os campos antes de salvar
+        $data['nome'] = sanitize($data['nome'] ?? 'Anônimo');
+        $data['texto'] = sanitize($data['texto']);
+        $data['email'] = sanitize($data['email'] ?? '');
+        $data['data'] = sanitize($data['data'] ?? date('d/m/Y'));
+        
         save_data('recados.json', $data);
         echo json_encode(["status" => "sucesso"]);
     } else {
-        echo json_encode(["status" => "erro"]);
+        echo json_encode(["status" => "erro", "message" => "JSON inválido ou dados faltando."]);
     }
 } elseif ($action === 'get_fotos') {
     echo get_data('fotos.json');
 } elseif ($action === 'upload_foto') {
-    // Nova lógica que faz o Upload direto do celular/PC
     if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
         $uploadDir = 'uploads/';
-        
-        // Cria a pasta uploads se ela não existir no servidor
-        if (!is_dir($uploadDir)) {
-            mkdir($uploadDir, 0777, true);
-        }
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
         
         $fileInfo = pathinfo($_FILES['foto']['name']);
         $ext = strtolower(isset($fileInfo['extension']) ? $fileInfo['extension'] : '');
@@ -51,13 +58,13 @@ if ($action === 'get_recados') {
              exit;
         }
 
-        // Dá um nome único para a foto não substituir outra sem querer
         $fileName = uniqid('foto_') . '.' . $ext;
         $targetPath = $uploadDir . $fileName;
 
         if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetPath)) {
-            $desc = isset($_POST['desc']) ? $_POST['desc'] : '';
-            $email = isset($_POST['email']) ? $_POST['email'] : '';
+            // Sanitiza os campos antes de salvar
+            $desc = isset($_POST['desc']) ? sanitize($_POST['desc']) : '';
+            $email = isset($_POST['email']) ? sanitize($_POST['email']) : '';
             
             $novaFoto = [
                 "url" => $targetPath,
@@ -70,7 +77,7 @@ if ($action === 'get_recados') {
             echo json_encode(["status" => "erro", "message" => "Erro ao salvar a foto no servidor."]);
         }
     } else {
-        echo json_encode(["status" => "erro", "message" => "Nenhuma foto foi enviada ou ocorreu um erro no upload."]);
+        echo json_encode(["status" => "erro", "message" => "Nenhuma foto enviada ou formato corrompido."]);
     }
 } else {
     echo json_encode(["error" => "Ação inválida"]);

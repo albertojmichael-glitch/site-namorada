@@ -2,30 +2,24 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>♥ Recados ♥</title>
-<link rel="stylesheet" href="css/style.css">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Nosso cantinho especial. Memórias, fotos e muito amor.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
+<meta name="description" content="Livro de recados do casal.">
+<title>♥ Recados ♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+<script src="js/geral.js" defer></script>
 </head>
 <body>
 <div class="topbar"></div>
-<nav class="topnav">
-  <a href="index.html">🏠 início</a>
-  <a href="memorias.html">💌 nossa história</a>
-  <a href="fotos.html">📸 fotos</a>
-  <a href="jogos.html">🎮 minijogos</a>
-  <a href="recados.html">💬 recados</a>
-</nav>
+<!-- NAV INJETADA -->
 
 <div class="container">
-  <div class="site-title" style="font-size:30px;">💬 Livro de Recados 💬</div>
+  <div class="site-title title-lg">💬 Livro de Recados 💬</div>
   <div class="box">
     <h2>Deixe um recadinho ✎</h2>
-    <input type="text" id="recado-nome" placeholder="Seu apelido carinhoso">
-    <textarea id="recado-texto" rows="4" placeholder="Escreva sua mensagem aqui..."></textarea>
-    <div style="text-align:center;">
+    <input type="text" id="recado-nome" placeholder="seu apelido">
+    <textarea id="recado-texto" rows="4" placeholder="escreva sua mensagem aqui..."></textarea>
+    <div class="btn-container">
       <button class="btn-retro" onclick="enviarRecado()">💌 Enviar Recado</button>
     </div>
   </div>
@@ -35,7 +29,6 @@
   </div>
 </div>
 <div class="rodape">Feito por Alberto</div>
-<script src="js/geral.js" defer></script>
 <script>
 async function carregarRecados() {
   try {
@@ -44,45 +37,29 @@ async function carregarRecados() {
     const container = document.getElementById("lista-recados");
     
     if (lista.length === 0) {
-      container.innerHTML = "<p>Nenhum recado ainda.💗</p>";
+      container.innerHTML = "<p>Nenhum recado ainda... seja a primeira! 💗</p>";
       return;
     }
-    
     container.innerHTML = lista.slice().reverse().map(r => `
-      <div class="recado-item">
-        <span>${r.data}</span>
-        <b>${r.nome}:</b> ${r.texto}
-      </div>
+      <div class="recado-item"><span>${r.data}</span><b>${r.nome}:</b> ${r.texto}</div>
     `).join("");
-  } catch (error) {
-    document.getElementById("lista-recados").innerHTML = "<p>Nenhum recado ainda...</p>";
-  }
+  } catch (error) { document.getElementById("lista-recados").innerHTML = "<p>Nenhum recado ainda...</p>"; }
 }
 
 function enviarRecado() {
   const nome = document.getElementById("recado-nome").value.trim();
   const texto = document.getElementById("recado-texto").value.trim();
-  
-  if (!nome || !texto) {
-    alert("Preenche o nome e a mensagem! 😄");
-    return;
-  }
+  if (!nome || !texto) { alert("Preenche o nome e a mensagem! 😄"); return; }
   
   garantirEmail(async (email) => {
     const novoRecado = { nome, texto, email, data: new Date().toLocaleDateString("pt-BR") };
-    
     try {
-      await fetch("api.php?action=add_recado", {
-        method: "POST",
-        body: JSON.stringify(novoRecado)
-      });
+      await fetch("api.php?action=add_recado", { method: "POST", body: JSON.stringify(novoRecado) });
       document.getElementById("recado-nome").value = "";
       document.getElementById("recado-texto").value = "";
       alert("Recadinho guardado! 💖");
       carregarRecados();
-    } catch(e) {
-      alert("Erro ao conectar.");
-    }
+    } catch(e) { alert("Erro ao conectar."); }
   });
 }
 carregarRecados();
