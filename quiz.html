@@ -9,11 +9,11 @@
 
 <div class="topbar"></div>
 <nav class="topnav">
-  <a href="index.html">🏠 Início</a>
-  <a href="memorias.html">💌 Nossa História</a>
-  <a href="fotos.html">📸 Fotos</a>
-  <a href="jogos.html">🎮 Mini-Jogos</a>
-  <a href="recados.html">💬 Recados</a>
+  <a href="index.html">🏠 início</a>
+  <a href="memorias.html">💌 nossa história</a>
+  <a href="fotos.html">📸 fotos</a>
+  <a href="jogos.html">🎮 minijogos</a>
+  <a href="recados.html">💬 recados</a>
 </nav>
 
 <div class="container">
@@ -21,14 +21,13 @@
   <div class="site-title" style="font-size:30px;">❓ Quiz do Casal ❓</div>
 
   <div class="box">
-    <p>O quanto você me conhece? Responde aí! 😄 <i>(Alberto: essas perguntas são só
-    um exemplo, você pode trocar por outras no arquivo quiz.html)</i></p>
+    <p>quizao brabo <i></i></p>
   </div>
 
   <div class="box">
     <div id="quiz-area"></div>
     <div style="text-align:center;">
-      <button class="btn-retro" onclick="reiniciarQuiz()">🔄 Recomeçar</button>
+      <button class="btn-retro" onclick="reiniciarQuiz()"> recomeçar</button>
     </div>
   </div>
 
@@ -44,28 +43,28 @@
 // EDITE AQUI: cada pergunta tem opções e o índice da correta (começando em 0)
 const perguntas = [
   {
-    pergunta: "Em que dia a gente começou a namorar?",
-    opcoes: ["15/10/2025", "22/12/2025", "01/01/2026", "21/05/2026"],
+    pergunta: "Em que dia a gente começou a namorar?(so te acordar)",
+    opcoes: ["23/12/2025", "22/12/2025", "16/01/2025", "30/10/2024"],
     correta: 1
   },
   {
-    pergunta: "Qual é a cor favorita do Alberto?",
+    pergunta: "qual é a minha cor favorita?",
     opcoes: ["Laranja", "Azul", "Rosa e lilás", "Verde"],
     correta: 2
   },
   {
-    pergunta: "Qual é a cor favorita da Camilly?",
-    opcoes: ["Laranja", "Rosa", "Preto", "Lilás"],
+    pergunta: "qual é a sua cor favorita?",
+    opcoes: ["Laranja e azul-escuro", "Rosa", "azul-escuro", "Lilás"],
     correta: 0
   },
   {
     pergunta: "Em que dia foi a aliança?",
-    opcoes: ["21/05/2026", "22/12/2025", "10/07/2026", "14/02/2026"],
+    opcoes: ["21/05/2026", "22/12/2025", "21/06/2026", "22/05/2026"],
     correta: 0
   },
   {
-    pergunta: "Como se chama o gato da foto do Alberto?",
-    opcoes: ["Mimi", "Feliz", "Tom", "Bolinha"],
+    pergunta: "qual é o nome do meu gato?",
+    opcoes: ["cachorro", "Felix", "Ouvido", "Coraline"],
     correta: 1
   }
 ];
@@ -93,9 +92,9 @@ function responder(i) {
   const p = perguntas[indiceAtual];
   if (i === p.correta) {
     acertos++;
-    alert("Certinho! 💗");
+    alert("Certo");
   } else {
-    alert("Quase! A resposta certa era: " + p.opcoes[p.correta]);
+    alert("A resposta certa era: " + p.opcoes[p.correta]);
   }
   indiceAtual++;
   renderPergunta();
