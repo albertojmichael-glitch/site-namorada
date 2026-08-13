@@ -2,46 +2,28 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>♥ Galeria de Fotos ♥</title>
-<link rel="stylesheet" href="css/style.css">
-<style>
-/* Estilo pro botão de arquivo ficar bonitinho */
-input[type="file"] {
-    background: #fff;
-    border: 3px inset #9b5de5;
-    padding: 8px;
-    width: 90%;
-    margin-bottom: 10px;
-    font-family: inherit;
-    cursor: pointer;
-}
-</style>
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Nosso cantinho especial. Memórias, fotos e muito amor.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
+<meta name="description" content="Galeria de fotos do casal.">
+<title>♥ Galeria de Fotos ♥</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📸</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+<script src="js/geral.js" defer></script>
 </head>
 <body>
 <div class="topbar"></div>
-<nav class="topnav">
-  <a href="index.html">🏠 início</a>
-  <a href="memorias.html">💌 nossa história</a>
-  <a href="fotos.html">📸 fotos</a>
-  <a href="jogos.html">🎮 minijogos</a>
-  <a href="recados.html">💬 recados</a>
-</nav>
+<!-- NAV INJETADA -->
 
 <div class="container">
-  <div class="site-title" style="font-size:32px;"> Galeria de Fotos </div>
+  <div class="site-title title-lg"> Galeria de Fotos </div>
 
-  <div class="box" style="text-align: center;">
+  <div class="box text-center">
     <h3>Adicionar Nova Foto 📸</h3>
     <input type="file" id="file-foto" accept="image/*">
     <input type="text" id="desc-foto" placeholder="Descrição da foto">
     <button class="btn-retro" onclick="adicionarNovaFoto()">Adicionar ao Álbum</button>
   </div>
 
-  <div class="banner-especial" style="font-size:18px;">memórias incriveis</div>
+  <div class="banner-especial text-md">memórias incriveis</div>
   <div class="box">
     <div class="galeria" id="galeria-fotos">
       <div class="foto-card"><img loading="lazy" src="images/casal2022.jpg" alt="a gente 2022"><p>a gente 2022</p></div>
@@ -54,12 +36,11 @@ input[type="file"] {
       <div class="foto-card"><img loading="lazy" src="images/crianca.jpg" alt="eu criança"><p>eu criança</p></div>
       <div class="foto-card"><img loading="lazy" src="images/daee2.jpg" alt="eu no daee"><p>eu no daee</p></div>
       <div class="foto-card"><img loading="lazy" src="images/daee3.jpeg" alt="a gente no daee 2"><p>a gente no daee 2</p></div>
-      <div class="foto-card"><img loading="lazy" src="images/feliz_gato.jpg" alt="eu e o Feliz"><p>eu e o Felix</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/feliz_gato.jpg" alt="eu e o Feliz"><p>eu e o Feliz</p></div>
     </div>
   </div>
 </div>
 <div class="rodape">Feito por Alberto</div>
-<script src="js/geral.js" defer></script>
 <script>
 async function carregarFotosExtras() {
   try {
@@ -73,9 +54,7 @@ async function carregarFotosExtras() {
       novaDiv.innerHTML = `<img loading="lazy" src="${f.url}" alt="${f.desc}"><p>${f.desc}</p><p style="font-size:10px;color:#999">Por: ${f.email}</p>`;
       galeria.appendChild(novaDiv);
     });
-  } catch(e) {
-    console.log("Backend offline.");
-  }
+  } catch(e) { console.log("Backend offline."); }
 }
 
 function adicionarNovaFoto() {
@@ -97,21 +76,15 @@ function adicionarNovaFoto() {
       const btn = document.querySelector("button.btn-retro");
       const btnOriginalText = btn.innerText;
       btn.innerText = "Carregando... ⏳";
-      
       const res = await fetch("api.php?action=upload_foto", { method: "POST", body: formData });
       const resultado = await res.json();
-      
       btn.innerText = btnOriginalText;
       
       if (resultado.status === "sucesso") {
           alert("Foto enviada! ✨");
           setTimeout(() => location.reload(), 1500);
-      } else {
-          alert("Erro: " + (resultado.message || "Desconhecido"));
-      }
-    } catch(e) {
-      alert("Erro no servidor.");
-    }
+      } else { alert("Erro: " + (resultado.message || "Desconhecido")); }
+    } catch(e) { alert("Erro no servidor."); }
   });
 }
 document.addEventListener("DOMContentLoaded", carregarFotosExtras);
