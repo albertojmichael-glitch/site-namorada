@@ -11,7 +11,8 @@
 body {
   margin: 0;
   padding: 0;
-  font-family: "Comic Sans MS", "Trebuchet MS", cursive, sans-serif;
+  /* Adeus Comic Sans! Trocado para Trebuchet MS que é muito mais legível e ainda retrô */
+  font-family: "Trebuchet MS", "Lucida Grande", Tahoma, sans-serif;
   background-color: #ffd9ec;
   background-image:
     repeating-linear-gradient(45deg, #ffb6e6 0px, #ffb6e6 2px, transparent 2px, transparent 40px),
