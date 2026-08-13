@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+<meta charset="UTF-8">
+<title>♥ Quiz do Casal ♥</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div class="topbar"></div>
+<nav class="topnav">
+  <a href="index.html">🏠 Início</a>
+  <a href="memorias.html">💌 Nossa História</a>
+  <a href="fotos.html">📸 Fotos</a>
+  <a href="jogos.html">🎮 Mini-Jogos</a>
+  <a href="recados.html">💬 Recados</a>
+</nav>
+
+<div class="container">
+
+  <div class="site-title" style="font-size:30px;">❓ Quiz do Casal ❓</div>
+
+  <div class="box">
+    <p>O quanto você me conhece? Responde aí! 😄 <i>(Alberto: essas perguntas são só
+    um exemplo, você pode trocar por outras no arquivo quiz.html)</i></p>
+  </div>
+
+  <div class="box">
+    <div id="quiz-area"></div>
+    <div style="text-align:center;">
+      <button class="btn-retro" onclick="reiniciarQuiz()">🔄 Recomeçar</button>
+    </div>
+  </div>
+
+</div>
+
+<div class="rodape">
+  Feito por Alberto
+</div>
+
+<script src="js/geral.js"></script>
+<script>
+// ================= QUIZ DO CASAL =================
+// EDITE AQUI: cada pergunta tem opções e o índice da correta (começando em 0)
+const perguntas = [
+  {
+    pergunta: "Em que dia a gente começou a namorar?",
+    opcoes: ["15/10/2025", "22/12/2025", "01/01/2026", "21/05/2026"],
+    correta: 1
+  },
+  {
+    pergunta: "Qual é a cor favorita do Alberto?",
+    opcoes: ["Laranja", "Azul", "Rosa e lilás", "Verde"],
+    correta: 2
+  },
+  {
+    pergunta: "Qual é a cor favorita da Camilly?",
+    opcoes: ["Laranja", "Rosa", "Preto", "Lilás"],
+    correta: 0
+  },
+  {
+    pergunta: "Em que dia foi a aliança?",
+    opcoes: ["21/05/2026", "22/12/2025", "10/07/2026", "14/02/2026"],
+    correta: 0
+  },
+  {
+    pergunta: "Como se chama o gato da foto do Alberto?",
+    opcoes: ["Mimi", "Feliz", "Tom", "Bolinha"],
+    correta: 1
+  }
+];
+
+let indiceAtual = 0;
+let acertos = 0;
+
+function renderPergunta() {
+  const area = document.getElementById("quiz-area");
+  if (indiceAtual >= perguntas.length) {
+    area.innerHTML = `<div id="quiz-resultado">Você acertou ${acertos} de ${perguntas.length}! 💗</div>`;
+    return;
+  }
+  const p = perguntas[indiceAtual];
+  let html = `<div class="quiz-pergunta">${indiceAtual + 1}. ${p.pergunta}</div>`;
+  html += `<div class="quiz-opcoes">`;
+  p.opcoes.forEach((opcao, i) => {
+    html += `<button class="btn-retro" onclick="responder(${i})">${opcao}</button>`;
+  });
+  html += `</div>`;
+  area.innerHTML = html;
+}
+
+function responder(i) {
+  const p = perguntas[indiceAtual];
+  if (i === p.correta) {
+    acertos++;
+    alert("Certinho! 💗");
+  } else {
+    alert("Quase! A resposta certa era: " + p.opcoes[p.correta]);
+  }
+  indiceAtual++;
+  renderPergunta();
+}
+
+function reiniciarQuiz() {
+  indiceAtual = 0;
+  acertos = 0;
+  renderPergunta();
+}
+
+renderPergunta();
+</script>
+</body>
+</html>
