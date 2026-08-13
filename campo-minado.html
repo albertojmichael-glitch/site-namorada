@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>♥ Campo Minado ♥</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* Estilos do Campo Minado adaptados para não quebrar o site retro */
+        :root {
+            --bg: #160910;
+            --panel: #24101a;
+            --panel-light: #321522;
+            --cell: #492033;
+            --cell-hover: #633047;
+            --cell-open: #26121b;
+            --heart: #ff477e;
+            --heart-light: #ff8eaa;
+            --text: #ffe8ef;
+            --muted: #c994a5;
+            --danger: #ff315f;
+            --success: #69e6a3;
+            --shadow: rgba(0, 0, 0, .45);
+        }
+
+        .game-wrapper {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            font-family: Inter, system-ui, sans-serif;
+            color: var(--text);
+            background: radial-gradient(circle at 20% 20%, #54162f 0%, transparent 30%),
+                        radial-gradient(circle at 80% 80%, #461328 0%, transparent 30%),
+                        var(--bg);
+            border-radius: 12px;
+            margin-top: 15px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .game-wrapper * {
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        .game {
+            width: min(960px, 100%);
+            background: rgba(36, 16, 26, .94);
+            border: 1px solid rgba(255, 142, 170, .18);
+            border-radius: 28px;
+            padding: 24px;
+            box-shadow: 0 25px 80px var(--shadow), inset 0 1px rgba(255,255,255,.05);
+            backdrop-filter: blur(12px);
+            z-index: 2;
+        }
+
+        .game header { text-align: center; margin-bottom: 22px; }
+        .game .title { margin: 0; font-size: clamp(2rem, 5vw, 3.2rem); letter-spacing: -2px; }
+        .game .title span { color: var(--heart); text-shadow: 0 0 30px rgba(255, 71, 126, .55); }
+        .game .subtitle { margin: 8px 0 0; color: var(--muted); font-size: 14px; }
+
+        .game .controls { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; margin-bottom: 18px; }
+        .game button, .game select { border: 1px solid rgba(255, 142, 170, .2); background: var(--panel-light); color: var(--text); border-radius: 12px; padding: 10px 14px; font-size: 14px; cursor: pointer; transition: .18s ease; }
+        .game button:hover, .game select:hover { background: #421d2c; border-color: rgba(255, 142, 170, .45); transform: translateY(-1px); }
+        .game button:active { transform: translateY(1px); }
+        .game .primary { background: var(--heart); color: white; font-weight: 700; border-color: transparent; }
+        .game .primary:hover { background: #ff5b8b; }
+
+        .game .stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px; }
+        .game .stat { background: rgba(20, 8, 14, .5); border-radius: 16px; padding: 13px; text-align: center; border: 1px solid rgba(255,255,255,.04); }
+        .game .stat-label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 5px; }
+        .game .stat-value { font-size: 22px; font-weight: 800; }
+
+        #board-wrapper { width: 100%; overflow: auto; padding: 8px; border-radius: 20px; background: rgba(10, 3, 7, .4); }
+        #board { display: grid; gap: 4px; width: max-content; margin: auto; }
+
+        .game .cell { width: 36px; height: 36px; border: 0; border-radius: 9px; background: linear-gradient(145deg, #5a263c, #3e182a); color: white; font-size: 17px; font-weight: 900; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: inset 0 1px rgba(255,255,255,.06), 0 2px 4px rgba(0,0,0,.25); transition: background .12s, transform .12s, box-shadow .12s; padding:0;}
+        .game .cell:hover:not(.revealed) { background: var(--cell-hover); transform: scale(1.05); }
+        .game .cell.revealed { background: var(--cell-open); cursor: default; box-shadow: inset 0 0 0 1px rgba(255,255,255,.025); }
+        .game .cell.flagged { color: var(--heart-light); text-shadow: 0 0 10px rgba(255,71,126,.6); }
+        .game .cell.mine { background: #63162f; animation: minePulse .8s ease infinite alternate; }
+
+        @keyframes minePulse { from { box-shadow: inset 0 0 0 1px rgba(255,71,126,.2); } to { box-shadow: inset 0 0 0 1px rgba(255,71,126,.8), 0 0 18px rgba(255,71,126,.35); } }
+
+        .number-1 { color: #76a9ff; } .number-2 { color: #65e6a3; } .number-3 { color: #ff6d8f; } .number-4 { color: #b68cff; } .number-5 { color: #ffae5c; } .number-6 { color: #62e4e8; } .number-7 { color: #ffffff; } .number-8 { color: #a9a9a9; }
+
+        .game .message { min-height: 28px; margin-top: 18px; text-align: center; font-weight: 700; }
+        .game .message.win { color: var(--success); }
+        .game .message.lose { color: var(--danger); }
+        .game .help { text-align: center; color: var(--muted); font-size: 12px; margin-top: 12px; }
+
+        /* Modal Escopado */
+        #cm-modal { position: absolute; inset: 0; display: none; align-items: center; justify-content: center; padding: 20px; background: rgba(7, 2, 5, .72); backdrop-filter: blur(7px); z-index: 100; border-radius: 12px;}
+        #cm-modal.visible { display: flex; }
+        .cm-modal-content { width: min(420px, 100%); text-align: center; background: #28111c; border: 1px solid rgba(255,142,170,.2); border-radius: 24px; padding: 30px; box-shadow: 0 30px 100px rgba(0,0,0,.7); animation: modalIn .25s ease; color: white;}
+        @keyframes modalIn { from { opacity: 0; transform: scale(.9) translateY(15px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+        .cm-modal-heart { font-size: 70px; line-height: 1; animation: heartbeat 1.2s infinite; margin: 0 auto; color: var(--heart);}
+        @keyframes heartbeat { 0%, 100% { transform: scale(1); } 15% { transform: scale(1.18); } 30% { transform: scale(1); } 45% { transform: scale(1.1); } }
+        .cm-modal-content h2 { margin: 15px 0 8px; color: white; background: none; border: none; padding: 0; text-shadow: none;}
+        .cm-modal-content p { color: var(--muted); line-height: 1.5; }
+
+        .error-box { display: none; position: fixed; bottom: 20px; right: 20px; max-width: 360px; padding: 15px; border-radius: 14px; background: #3b1020; border: 1px solid #8d2948; color: #ffdbe4; z-index: 999; box-shadow: 0 15px 40px rgba(0,0,0,.5); }
+        .error-box.visible { display: block; }
+
+        @media (max-width: 600px) { .game { padding: 15px; border-radius: 20px; } .game .cell { width: 30px; height: 30px; border-radius: 7px; font-size: 14px; } .game .stats { gap: 7px; } .game .stat { padding: 9px 4px; } .game .stat-value { font-size: 18px; } }
+    </style>
+</head>
+<body>
+
+<div class="topbar"></div>
+<nav class="topnav">
+  <a href="index.html">🏠 início</a>
+  <a href="memorias.html">💌 nossa história</a>
+  <a href="fotos.html">📸 fotos</a>
+  <a href="jogos.html">🎮 minijogos</a>
+  <a href="recados.html">💬 recados</a>
+</nav>
+
+<div class="container">
+  <div class="site-title" style="font-size:32px;">💣 Campo Minado 💣</div>
+  <div class="box" style="padding: 0; border: none; background: transparent;">
+      
+      <div class="game-wrapper">
+          <main class="game">
+              <header>
+                  <h1 class="title">Campo Minado <span>♥</span></h1>
+                  <p class="subtitle">Encontre os corações seguros. Evite os corações partidos.</p>
+              </header>
+
+              <section class="controls">
+                  <label>
+                      <select id="difficulty" aria-label="Dificuldade">
+                          <option value="easy">Fácil · 9×9 · 10 ♥</option>
+                          <option value="medium" selected>Médio · 16×16 · 40 ♥</option>
+                          <option value="hard">Difícil · 30×16 · 99 ♥</option>
+                      </select>
+                  </label>
+                  <button id="newGame" class="primary">♥ Novo jogo</button>
+              </section>
+
+              <section class="stats">
+                  <div class="stat"><span class="stat-label">Corações restantes</span><span class="stat-value" id="mineCounter">40</span></div>
+                  <div class="stat"><span class="stat-label">Tempo</span><span class="stat-value" id="timer">000</span></div>
+                  <div class="stat"><span class="stat-label">Status</span><span class="stat-value" id="status">♥</span></div>
+              </section>
+
+              <div id="board-wrapper"><div id="board"></div></div>
+              <div id="message" class="message"></div>
+              <div class="help">Clique esquerdo para revelar · Clique direito para colocar</div>
+          </main>
+
+          <div id="cm-modal">
+              <div class="cm-modal-content">
+                  <div class="cm-modal-heart" id="modalIcon">♥</div>
+                  <h2 id="modalTitle">você conseguiu, pabens</h2>
+                  <p id="modalText">nenhum coração foi partido</p>
+                  <button id="modalRestart" class="primary" style="margin-top: 15px;">♥ jogar novamente</button>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+
+<div id="errorBox" class="error-box">
+    <strong>💔</strong>
+    <div id="errorText"></div>
+</div>
+
+<div class="rodape">Feito por Alberto</div>
+<script src="js/geral.js"></script>
+
+<script>
+"use strict";
+
+const Game = (() => {
+    const DIFFICULTIES = Object.freeze({
+        easy: Object.freeze({ rows: 9, cols: 9, mines: 10 }),
+        medium: Object.freeze({ rows: 16, cols: 16, mines: 40 }),
+        hard: Object.freeze({ rows: 16, cols: 30, mines: 99 })
+    });
+
+    const STATES = Object.freeze({ READY: "ready", PLAYING: "playing", WON: "won", LOST: "lost" });
+
+    let state = { rows: 16, cols: 16, mines: 40, board: [], gameState: STATES.READY, flags: 0, revealed: 0, timer: 0, timerId: null, firstMove: true };
+    const DOM = {};
+
+    function cacheDOM() {
+        DOM.board = document.getElementById("board");
+        DOM.difficulty = document.getElementById("difficulty");
+        DOM.newGame = document.getElementById("newGame");
+        DOM.mineCounter = document.getElementById("mineCounter");
+        DOM.timer = document.getElementById("timer");
+        DOM.status = document.getElementById("status");
+        DOM.message = document.getElementById("message");
+        DOM.modal = document.getElementById("cm-modal");
+        DOM.modalIcon = document.getElementById("modalIcon");
+        DOM.modalTitle = document.getElementById("modalTitle");
+        DOM.modalText = document.getElementById("modalText");
+        DOM.modalRestart = document.getElementById("modalRestart");
+        DOM.errorBox = document.getElementById("errorBox");
+        DOM.errorText = document.getElementById("errorText");
+    }
+
+    function safeNumber(value, fallback = 0) { const number = Number(value); return Number.isFinite(number) ? number : fallback; }
+    function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
+    function randomInt(max) { if (!Number.isInteger(max) || max <= 0) return 0; return Math.floor(Math.random() * max); }
+    function isInside(row, col) { return (Number.isInteger(row) && Number.isInteger(col) && row >= 0 && row < state.rows && col >= 0 && col < state.cols); }
+    
+    function getNeighbors(row, col) {
+        const neighbors = [];
+        for (let dr = -1; dr <= 1; dr++) {
+            for (let dc = -1; dc <= 1; dc++) {
+                if (dr === 0 && dc === 0) continue;
+                const r = row + dr; const c = col + dc;
+                if (isInside(r, c)) neighbors.push(state.board[r][c]);
+            }
+        }
+        return neighbors;
+    }
+
+    function createEmptyBoard() {
+        state.board = [];
+        for (let row = 0; row < state.rows; row++) {
+            const currentRow = [];
+            for (let col = 0; col < state.cols; col++) {
+                currentRow.push({ row, col, mine: false, revealed: false, flagged: false, adjacent: 0, element: null });
+            }
+            state.board.push(currentRow);
+        }
+    }
+
+    function placeMines(firstRow, firstCol) {
+        const forbidden = new Set();
+        forbidden.add(`${firstRow}:${firstCol}`);
+        for (const cell of getNeighbors(firstRow, firstCol)) forbidden.add(`${cell.row}:${cell.col}`);
+        
+        const available = [];
+        for (let row = 0; row < state.rows; row++) {
+            for (let col = 0; col < state.cols; col++) {
+                const key = `${row}:${col}`;
+                if (!forbidden.has(key)) available.push(state.board[row][col]);
+            }
+        }
+
+        const mineCount = Math.min(state.mines, available.length);
+        for (let i = 0; i < mineCount; i++) {
+            const randomIndex = randomInt(available.length);
+            const cell = available.splice(randomIndex, 1)[0];
+            if (cell) cell.mine = true;
+        }
+        calculateNumbers();
+    }
+
+    function calculateNumbers() {
+        for (const row of state.board) {
+            for (const cell of row) {
+                if (cell.mine) { cell.adjacent = -1; continue; }
+                let count = 0;
+                for (const neighbor of getNeighbors(cell.row, cell.col)) { if (neighbor.mine) count++; }
+                cell.adjacent = count;
+            }
+        }
+    }
+
+    function renderBoard() {
+        DOM.board.innerHTML = "";
+        DOM.board.style.gridTemplateColumns = `repeat(${state.cols}, 36px)`;
+        if (window.innerWidth <= 600) DOM.board.style.gridTemplateColumns = `repeat(${state.cols}, 30px)`;
+
+        for (let row = 0; row < state.rows; row++) {
+            for (let col = 0; col < state.cols; col++) {
+                const cell = state.board[row][col];
+                const button = document.createElement("button");
+                button.className = "cell"; button.type = "button";
+                button.dataset.row = row; button.dataset.col = col;
+                button.setAttribute("aria-label", "Célula escondida");
+                cell.element = button;
+                button.addEventListener("click", () => safeAction(() => { reveal(row, col); }));
+                button.addEventListener("contextmenu", event => { event.preventDefault(); safeAction(() => { toggleFlag(row, col); }); });
+                DOM.board.appendChild(button);
+            }
+        }
+    }
+
+    function renderCell(cell) {
+        if (!cell || !cell.element) return;
+        const element = cell.element;
+        element.className = "cell"; element.textContent = "";
+        if (cell.revealed) {
+            element.classList.add("revealed");
+            if (cell.mine) {
+                element.classList.add("mine"); element.textContent = "💔";
+                element.setAttribute("aria-label", "Coração partido");
+                return;
+            }
+            if (cell.adjacent > 0) {
+                element.textContent = String(cell.adjacent);
+                element.classList.add(`number-${clamp(cell.adjacent, 1, 8)}`);
+            }
+            element.setAttribute("aria-label", cell.adjacent === 0 ? "Área vazia" : `${cell.adjacent} corações próximos`);
+            return;
+        }
+        if (cell.flagged) {
+            element.classList.add("flagged"); element.textContent = "♥";
+            element.setAttribute("aria-label", "Coração marcado");
+            return;
+        }
+        element.setAttribute("aria-label", "Célula escondida");
+    }
+
+    function renderAllCells() {
+        for (const row of state.board) { for (const cell of row) renderCell(cell); }
+    }
+
+    function reveal(row, col) {
+        if (state.gameState === STATES.WON || state.gameState === STATES.LOST) return;
+        if (!isInside(row, col)) return;
+        const cell = state.board[row][col];
+        if (!cell || cell.flagged || cell.revealed) return;
+
+        if (state.firstMove) {
+            placeMines(row, col);
+            state.firstMove = false; state.gameState = STATES.PLAYING;
+            startTimer();
+        }
+
+        if (cell.mine) { cell.revealed = true; loseGame(); return; }
+        floodReveal(cell); checkWin(); updateUI();
+    }
+
+    function floodReveal(startCell) {
+        const queue = [startCell]; const visited = new Set();
+        while (queue.length > 0) {
+            const cell = queue.shift();
+            if (!cell) continue;
+            const key = `${cell.row}:${cell.col}`;
+            if (visited.has(key)) continue;
+            visited.add(key);
+            if (cell.revealed || cell.flagged || cell.mine) continue;
+            cell.revealed = true; state.revealed++;
+            if (cell.adjacent === 0) {
+                for (const neighbor of getNeighbors(cell.row, cell.col)) {
+                    if (!neighbor.revealed && !neighbor.mine && !neighbor.flagged) queue.push(neighbor);
+                }
+            }
+        }
+        renderAllCells();
+    }
+
+    function toggleFlag(row, col) {
+        if (state.gameState === STATES.WON || state.gameState === STATES.LOST) return;
+        if (!isInside(row, col)) return;
+        const cell = state.board[row][col];
+        if (!cell || cell.revealed) return;
+        if (!cell.flagged) {
+            if (state.flags >= state.mines) { setMessage("você ja marcou todos os corações.", false); return; }
+            cell.flagged = true; state.flags++;
+        } else {
+            cell.flagged = false; state.flags--;
+        }
+        renderCell(cell); updateUI(); checkWin();
+    }
+
+    function checkWin() {
+        if (state.gameState === STATES.LOST || state.gameState === STATES.WON) return;
+        const safeCells = state.rows * state.cols - state.mines;
+        if (state.revealed >= safeCells) winGame();
+    }
+
+    function winGame() {
+        state.gameState = STATES.WON; stopTimer();
+        for (const row of state.board) { for (const cell of row) { if (cell.mine && !cell.flagged) { cell.flagged = true; state.flags++; } } }
+        renderAllCells(); updateUI();
+        setMessage("você encontrou todos os corações do bem ♥", true);
+        showModal("♥", "pabens", `Você venceu em ${formatTime(state.timer)} segundos.`);
+    }
+
+    function loseGame() {
+        state.gameState = STATES.LOST; stopTimer();
+        for (const row of state.board) { for (const cell of row) { if (cell.mine) cell.revealed = true; } }
+        renderAllCells(); updateUI();
+        setMessage("um coração partiu </3", false);
+        // BUG FIX AQUI: Estava faltando o texto e tinha vírgula sobrando no código original
+        showModal("</3", "coração partido", "Você pisou em um coração partido.");
+    }
+
+    function startTimer() {
+        stopTimer();
+        state.timerId = setInterval(() => {
+            if (state.gameState !== STATES.PLAYING) { stopTimer(); return; }
+            state.timer++; state.timer = clamp(state.timer, 0, 999999); updateTimer();
+        }, 1000);
+    }
+
+    function stopTimer() { if (state.timerId !== null) { clearInterval(state.timerId); state.timerId = null; } }
+    function updateTimer() { DOM.timer.textContent = String(state.timer).padStart(3, "0"); }
+    function formatTime(seconds) { return String(safeNumber(seconds)).padStart(3, "0"); }
+
+    function updateUI() {
+        const remaining = Math.max(0, state.mines - state.flags);
+        DOM.mineCounter.textContent = String(remaining);
+        updateTimer();
+        const symbols = { ready: "♥", playing: "♥", won: "✓", lost: "×" };
+        DOM.status.textContent = symbols[state.gameState] || "♥";
+    }
+
+    function setMessage(text, success) { DOM.message.textContent = text; DOM.message.className = `message ${success ? "win" : "lose"}`; }
+    function showModal(icon, title, text) { DOM.modalIcon.textContent = icon; DOM.modalTitle.textContent = title; DOM.modalText.textContent = text; DOM.modal.classList.add("visible"); }
+    function hideModal() { DOM.modal.classList.remove("visible"); }
+
+    function newGame(difficultyKey) {
+        try {
+            const difficulty = DIFFICULTIES[difficultyKey];
+            if (!difficulty) throw new Error("Dificuldade inválida.");
+            stopTimer(); hideModal();
+            state.rows = safeNumber(difficulty.rows, 16);
+            state.cols = safeNumber(difficulty.cols, 16);
+            state.mines = safeNumber(difficulty.mines, 40);
+            const totalCells = state.rows * state.cols;
+            state.mines = clamp(state.mines, 1, Math.max(1, totalCells - 1));
+            state.gameState = STATES.READY;
+            state.flags = 0; state.revealed = 0; state.timer = 0; state.firstMove = true;
+            createEmptyBoard(); renderBoard(); renderAllCells(); updateUI();
+            setMessage("Escolha seu primeiro coração ♥", true);
+        } catch (error) { reportError("Não foi possível iniciar o jogo.", error); }
+    }
+
+    function safeAction(callback) {
+        try { if (typeof callback !== "function") throw new Error("Ação inválida."); callback(); } 
+        catch (error) { reportError("O jogo encontrou um erro, mas tentou continuar.", error); try { validateState(); } catch (validationError) { newGame(DOM.difficulty.value || "medium"); } }
+    }
+
+    function validateState() { return true; }
+    function reportError(message, error) { DOM.errorText.textContent = `${message} ${error?.message || ""}`; DOM.errorBox.classList.add("visible"); setTimeout(() => { DOM.errorBox.classList.remove("visible"); }, 6000); }
+
+    function setupEvents() {
+        DOM.newGame.addEventListener("click", () => safeAction(() => { newGame(DOM.difficulty.value); }));
+        DOM.difficulty.addEventListener("change", () => safeAction(() => { newGame(DOM.difficulty.value); }));
+        DOM.modalRestart.addEventListener("click", () => safeAction(() => { newGame(DOM.difficulty.value); }));
+        DOM.modal.addEventListener("click", event => { if (event.target === DOM.modal) hideModal(); });
+    }
+
+    function init() { try { cacheDOM(); setupEvents(); newGame("medium"); } catch (error) { console.error(error); } }
+
+    return { init, newGame };
+})();
+
+if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", Game.init); } else { Game.init(); }
+</script>
+
+</body>
+</html>
