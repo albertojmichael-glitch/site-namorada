@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Snake - Nokia</title>
+<style>
+* {
+    box-sizing: border-box;
+    user-select: none;
+}
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: radial-gradient(circle at center, #33365e 0%, #181a32 70%);
+    font-family: "Courier New", monospace;
+    color: #d7d9e8;
+}
+
+.phone {
+    width: 390px;
+    max-width: 95vw;
+    padding: 30px 25px 35px;
+    background: linear-gradient(135deg, #44486f, #242747 45%, #17192f);
+    border-radius: 45px 45px 55px 55px;
+    box-shadow: inset 4px 4px 8px rgba(255,255,255,.12), inset -6px -8px 12px rgba(0,0,0,.45), 0 30px 70px rgba(0,0,0,.65);
+    border: 2px solid #0d0e1c;
+}
+
+.logo {
+    width: fit-content;
+    margin: 0 auto 25px;
+    padding: 2px 9px;
+    font-family: Arial, sans-serif;
+    font-size: 22px;
+    font-weight: 900;
+    letter-spacing: 1px;
+    color: #c8cad8;
+    background: #22243d;
+    border: 2px solid #121326;
+    box-shadow: inset 0 2px 3px rgba(255,255,255,.1);
+}
+
+.screen-frame {
+    padding: 13px;
+    background: #161827;
+    border-radius: 20px;
+    box-shadow: inset 0 5px 10px rgba(0,0,0,.65), 0 4px 5px rgba(255,255,255,.06);
+}
+
+.screen {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 1.65;
+    overflow: hidden;
+    background: #9cad38;
+    border: 3px solid #4b5720;
+    border-radius: 5px;
+    box-shadow: inset 0 0 20px rgba(41,53,8,.35);
+    image-rendering: pixelated;
+}
+
+.screen::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: repeating-linear-gradient(to bottom, rgba(45,55,10,.07) 0px, rgba(45,55,10,.07) 1px, transparent 1px, transparent 4px);
+    mix-blend-mode: multiply;
+}
+
+.hud {
+    position: absolute;
+    top: 5px;
+    left: 8px;
+    right: 8px;
+    display: flex;
+    justify-content: space-between;
+    color: #29330b;
+    font-size: 15px;
+    font-weight: bold;
+    z-index: 5;
+}
+
+.hud span { letter-spacing: 1px; }
+
+#game {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    width: 100%;
+    height: calc(100% - 24px);
+    image-rendering: pixelated;
+}
+
+.screen-message {
+    position: absolute;
+    inset: 24px 0 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    color: #29330b;
+    text-align: center;
+    z-index: 10;
+    background: rgba(156,173,56,.92);
+    font-weight: bold;
+}
+
+.screen-message.hidden { display: none; }
+.screen-message h2 { margin: 0 0 10px; font-size: 23px; letter-spacing: 2px; }
+.screen-message p { margin: 0; font-size: 13px; line-height: 1.6; }
+
+.controls {
+    margin-top: 25px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 18px;
+}
+
+button {
+    touch-action: manipulation; /* Tira o delay de clique no celular */
+    outline: none;
+}
+
+.center-button {
+    width: 110px;
+    height: 48px;
+    border-radius: 50%;
+    background: linear-gradient(to bottom, #d8daea, #8d91ae);
+    border: 2px solid #14162a;
+    box-shadow: inset 0 3px 4px rgba(255,255,255,.45), 0 4px 4px rgba(0,0,0,.45);
+    cursor: pointer;
+    transition: transform .08s;
+}
+
+.center-button:active { transform: translateY(3px); }
+
+.center-button::after {
+    content: "";
+    display: block;
+    width: 42px;
+    height: 7px;
+    margin: auto;
+    border-radius: 50%;
+    background: #4ab1a4;
+    opacity: .65;
+}
+
+.side-button {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    border: 2px solid #14162a;
+    background: linear-gradient(135deg, #d9dbea, #8a8eaa);
+    color: #477b6e;
+    font-size: 25px;
+    font-weight: bold;
+    box-shadow: inset 0 3px 4px rgba(255,255,255,.45), 0 4px 5px rgba(0,0,0,.5);
+    cursor: pointer;
+}
+
+.side-button:active { transform: translateY(3px); }
+
+.keypad {
+    margin-top: 25px;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 12px;
+}
+
+.key {
+    height: 45px;
+    border-radius: 50%;
+    border: 2px solid #17192c;
+    background: linear-gradient(to bottom, #d9dbea, #8589a7);
+    color: #4a856d;
+    font-family: Arial, sans-serif;
+    font-weight: bold;
+    box-shadow: inset 0 3px 4px rgba(255,255,255,.5), 0 4px 5px rgba(0,0,0,.5);
+    cursor: pointer;
+    transition: transform .08s;
+}
+
+.key:active { transform: translateY(3px); }
+.key:nth-child(1) { grid-column: 2; }
+.key:nth-child(2) { grid-column: 1; grid-row: 2; }
+.key:nth-child(3) { grid-column: 2; grid-row: 2; }
+.key:nth-child(4) { grid-column: 3; grid-row: 2; }
+.key:nth-child(5) { grid-column: 2; grid-row: 3; }
+
+.footer {
+    margin-top: 20px;
+    text-align: center;
+    font-size: 10px;
+    color: #8589a5;
+    letter-spacing: 1px;
+}
+</style>
+</head>
+<body>
+
+<div class="phone">
+    <div class="logo">SNAKE</div>
+    <div class="screen-frame">
+        <div class="screen">
+            <div class="hud">
+                <span id="score">0000</span>
+                <span id="level">1</span>
+            </div>
+            <canvas id="game" width="320" height="190"></canvas>
+            <div id="message" class="screen-message">
+                <h2>SNAKE</h2>
+                <p>PRESSIONE<br>ENTER PARA JOGAR</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="controls">
+        <button class="side-button" id="pause">II</button>
+        <button class="center-button" id="start"></button>
+        <button class="side-button" id="reset">↻</button>
+    </div>
+
+    <div class="keypad">
+        <button class="key" data-direction="up">▲</button>
+        <button class="key" data-direction="left">◀</button>
+        <button class="key" data-direction="down">▼</button>
+        <button class="key" data-direction="right">▶</button>
+    </div>
+
+    <div class="footer">NOKIA • SNAKE</div>
+</div>
+
+<script>
+"use strict";
+
+const canvas = document.getElementById("game");
+const ctx = canvas.getContext("2d");
+const scoreElement = document.getElementById("score");
+const levelElement = document.getElementById("level");
+const message = document.getElementById("message");
+const startButton = document.getElementById("start");
+const pauseButton = document.getElementById("pause");
+const resetButton = document.getElementById("reset");
+
+const CELL = 10;
+const COLS = Math.floor(canvas.width / CELL);
+const ROWS = Math.floor(canvas.height / CELL);
+
+let snake;
+let food;
+let direction;
+let inputQueue = []; // Fila de comandos para evitar bugs de morte rápida
+let score;
+let level;
+let speed;
+let timer = null;
+let running = false;
+let paused = false;
+
+function startGame() {
+    stopTimer();
+    snake = [{x: 12, y: 9}, {x: 11, y: 9}, {x: 10, y: 9}];
+    direction = {x: 1, y: 0};
+    inputQueue = [];
+    score = 0;
+    level = 1;
+    speed = 140;
+    running = true;
+    paused = false;
+    
+    updateHUD();
+    hideMessage();
+    spawnFood();
+    draw();
+    startTimer();
+}
+
+function startTimer() {
+    stopTimer();
+    timer = setInterval(update, speed);
+}
+
+function stopTimer() {
+    if (timer !== null) {
+        clearInterval(timer);
+        timer = null;
+    }
+}
+
+function update() {
+    if (!running || paused) return;
+
+    // Pega o próximo movimento válido da fila
+    if (inputQueue.length > 0) {
+        direction = inputQueue.shift();
+    }
+
+    const head = snake[0];
+    const newHead = { x: head.x + direction.x, y: head.y + direction.y };
+
+    // Colisão com as bordas
+    if (newHead.x < 0 || newHead.x >= COLS || newHead.y < 0 || newHead.y >= ROWS) {
+        gameOver();
+        return;
+    }
+
+    // Colisão com ela mesma
+    if (hitsSnake(newHead)) {
+        gameOver();
+        return;
+    }
+
+    snake.unshift(newHead);
+
+    // Comeu a comida
+    if (newHead.x === food.x && newHead.y === food.y) {
+        score += 10;
+        updateLevel();
+        spawnFood();
+    } else {
+        snake.pop();
+    }
+
+    updateHUD();
+    draw();
+}
+
+function hitsSnake(position) {
+    return snake.some(segment => segment.x === position.x && segment.y === position.y);
+}
+
+function spawnFood() {
+    let attempts = 0;
+    do {
+        food = { x: Math.floor(Math.random() * COLS), y: Math.floor(Math.random() * ROWS) };
+        attempts++;
+        if (attempts > 1000) {
+            gameOver();
+            return;
+        }
+    } while (hitsSnake(food));
+}
+
+function updateLevel() {
+    level = Math.floor(score / 50) + 1;
+    const newSpeed = Math.max(55, 140 - (level - 1) * 10);
+    if (newSpeed !== speed) {
+        speed = newSpeed;
+        startTimer();
+    }
+}
+
+function draw() {
+    // Fundo
+    ctx.fillStyle = "#9cad38";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Grid suave
+    ctx.fillStyle = "rgba(50,60,10,.035)";
+    for (let y = 0; y < ROWS; y++) {
+        for (let x = 0; x < COLS; x++) {
+            if ((x + y) % 3 === 0) {
+                ctx.fillRect(x * CELL, y * CELL, 1, 1);
+            }
+        }
+    }
+
+    // Comida
+    ctx.fillStyle = "#29330b";
+    ctx.fillRect(food.x * CELL + 1, food.y * CELL + 1, CELL - 2, CELL - 2);
+
+    // Cobrinha
+    snake.forEach((segment) => {
+        ctx.fillStyle = "#29330b";
+        ctx.fillRect(segment.x * CELL + 1, segment.y * CELL + 1, CELL - 2, CELL - 2);
+    });
+}
+
+function gameOver() {
+    running = false;
+    paused = false;
+    stopTimer();
+    showMessage("GAME OVER", `SCORE ${String(score).padStart(4, "0")}<br>PRESSIONE ENTER`);
+}
+
+function updateHUD() {
+    scoreElement.textContent = String(score).padStart(4, "0");
+    levelElement.textContent = String(level);
+}
+
+function showMessage(title, text) {
+    message.innerHTML = `<h2>${title}</h2><p>${text}</p>`;
+    message.classList.remove("hidden");
+}
+
+function hideMessage() {
+    message.classList.add("hidden");
+}
+
+function togglePause() {
+    if (!running) return;
+    paused = !paused;
+    if (paused) {
+        showMessage("PAUSED", "PRESSIONE PAUSE<br>PARA CONTINUAR");
+    } else {
+        hideMessage();
+    }
+}
+
+function changeDirection(newDirection) {
+    if (!running || paused) return;
+
+    // Checa a última direção da fila (ou a atual se a fila estiver vazia)
+    const lastDir = inputQueue.length > 0 ? inputQueue[inputQueue.length - 1] : direction;
+
+    // Ignora se for a direção contrária (não pode dar ré em si mesmo)
+    if (newDirection.x === -lastDir.x && newDirection.y === -lastDir.y) return;
+    
+    // Ignora se for a mesma direção
+    if (newDirection.x === lastDir.x && newDirection.y === lastDir.y) return;
+
+    // Limita o tamanho da fila de inputs para não acumular botões apertados além do necessário
+    if (inputQueue.length < 2) {
+        inputQueue.push(newDirection);
+    }
+}
+
+document.addEventListener("keydown", event => {
+    // Evitar o comportamento padrão do navegador ao jogar
+    if(["Space", "ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"].indexOf(event.code) > -1) {
+        event.preventDefault();
+    }
+
+    switch (event.key) {
+        case "ArrowUp":    changeDirection({x: 0, y: -1}); break;
+        case "ArrowDown":  changeDirection({x: 0, y: 1}); break;
+        case "ArrowLeft":  changeDirection({x: -1, y: 0}); break;
+        case "ArrowRight": changeDirection({x: 1, y: 0}); break;
+        case "Enter":
+            if (!running) startGame();
+            else togglePause();
+            break;
+        case " ":
+            togglePause();
+            break;
+    }
+});
+
+startButton.addEventListener("click", () => {
+    if (!running) startGame();
+    else if (paused) togglePause();
+});
+
+pauseButton.addEventListener("click", togglePause);
+resetButton.addEventListener("click", startGame);
+
+document.querySelectorAll("[data-direction]").forEach(button => {
+    button.addEventListener("click", () => {
+        const value = button.dataset.direction;
+        const directions = {
+            up: {x: 0, y: -1},
+            down: {x: 0, y: 1},
+            left: {x: -1, y: 0},
+            right: {x: 1, y: 0}
+        };
+        if (directions[value]) changeDirection(directions[value]);
+    });
+});
+
+function init() {
+    score = 0;
+    level = 1;
+    updateHUD();
+    snake = [{x: 12, y: 9}, {x: 11, y: 9}, {x: 10, y: 9}];
+    direction = {x: 1, y: 0};
+    food = {x: 20, y: 9};
+    draw();
+    showMessage("SNAKE", "PRESSIONE<br>ENTER PARA JOGAR");
+}
+
+init();
+</script>
+</body>
+</html>
