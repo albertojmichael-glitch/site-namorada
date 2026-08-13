@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <title>♥ Galeria de Fotos ♥</title>
 <link rel="stylesheet" href="css/style.css">
+<style>
+/* Estilo pro botão de arquivo ficar bonitinho */
+input[type="file"] {
+    background: #fff;
+    border: 3px inset #9b5de5;
+    padding: 8px;
+    width: 90%;
+    margin-bottom: 10px;
+    font-family: inherit;
+    cursor: pointer;
+}
+</style>
 </head>
 <body>
 <div class="topbar"></div>
@@ -20,7 +32,8 @@
 
   <div class="box" style="text-align: center;">
     <h3>Adicionar Nova Foto 📸</h3>
-    <input type="text" id="url-foto" placeholder="Cole o link (URL) da imagem aqui">
+    <!-- Mudei para tipo "file" para carregar do PC/Celular -->
+    <input type="file" id="file-foto" accept="image/*">
     <input type="text" id="desc-foto" placeholder="Descrição da foto">
     <button class="btn-retro" onclick="adicionarNovaFoto()">Adicionar ao Álbum</button>
   </div>
@@ -33,8 +46,6 @@
       <div class="foto-card"><img src="images/daee.jpg" alt="a gente no daee"><p>a gente no daee</p></div>
       <div class="foto-card"><img src="images/sesc.jpg" alt="a gente no sesc"><p>a gente no sesc</p></div>
       <div class="foto-card"><img src="images/pedido.jpeg" alt="dias antes do pedido"><p>dias antes do pedido</p></div>
-      
-      <!-- Novas fotos inseridas -->
       <div class="foto-card"><img src="images/sesc2.jpeg" alt="sesc novamente"><p>sesc novamente</p></div>
       <div class="foto-card"><img src="images/sesc3.jpeg" alt="tarde no sesc"><p>tarde no sesc</p></div>
       <div class="foto-card"><img src="images/sombrio.jpeg" alt="eu sombrio"><p>eu sombrio</p></div>
@@ -67,20 +78,45 @@ async function carregarFotosExtras() {
 }
 
 function adicionarNovaFoto() {
-  const url = document.getElementById("url-foto").value.trim();
+  const fileInput = document.getElementById("file-foto");
   const desc = document.getElementById("desc-foto").value.trim();
-  if(!url) return alert("Ei, faltou colocar o link da foto!");
+  
+  if(fileInput.files.length === 0) return alert("Ei, faltou escolher a foto do seu dispositivo!");
+  if(!desc) return alert("Coloque uma descrição para a foto!");
+  
+  const fotoFile = fileInput.files[0];
   
   garantirEmail(async (email) => {
-    const novaFoto = { url, desc, email };
+    // Para enviar arquivos para o PHP, usamos FormData em vez de JSON string
+    const formData = new FormData();
+    formData.append("foto", fotoFile);
+    formData.append("desc", desc);
+    formData.append("email", email);
+
     try {
-      await fetch("api.php?action=add_foto", {
-        method: "POST", body: JSON.stringify(novaFoto)
+      // Trocando o "Enviando..." no botão pra pessoa saber que tá carregando
+      const btn = document.querySelector("button.btn-retro");
+      const btnOriginalText = btn.innerText;
+      btn.innerText = "Carregando foto... ⏳";
+      
+      const res = await fetch("api.php?action=upload_foto", {
+        method: "POST",
+        body: formData
       });
-      alert("Foto salva para sempre na nossa história! ✨");
-      setTimeout(() => location.reload(), 1500);
+      
+      const resultado = await res.json();
+      
+      btn.innerText = btnOriginalText;
+      
+      if (resultado.status === "sucesso") {
+          alert("Foto enviada e salva para sempre na nossa história! ✨");
+          setTimeout(() => location.reload(), 1500);
+      } else {
+          alert("Erro: " + (resultado.message || "Desconhecido"));
+      }
     } catch(e) {
       alert("Erro ao conectar no servidor.");
+      document.querySelector("button.btn-retro").innerText = "Adicionar ao Álbum";
     }
   });
 }
