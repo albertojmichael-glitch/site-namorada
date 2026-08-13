@@ -2,9 +2,16 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Campo minado.">
+    <meta property="og:title" content="♥ Campo Minado ♥">
+    <meta property="og:description" content="Encontre os corações do bem. Evite os corações do mal.">
+    <meta property="og:image" content="images/casal2022.jpg">
+    <meta property="og:type" content="website">
     <title>♥ Campo Minado ♥</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💣</text></svg>">
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/geral.js" defer></script>
     <style>
         :root { --bg: #160910; --panel: #24101a; --panel-light: #321522; --cell: #492033; --cell-hover: #633047; --cell-open: #26121b; --heart: #ff477e; --heart-light: #ff8eaa; --text: #ffe8ef; --muted: #c994a5; --danger: #ff315f; --success: #69e6a3; --shadow: rgba(0, 0, 0, .45); }
         .game-wrapper { display: flex; justify-content: center; align-items: center; padding: 24px; font-family: Inter, system-ui, sans-serif; color: var(--text); background: radial-gradient(circle at 20% 20%, #54162f 0%, transparent 30%), radial-gradient(circle at 80% 80%, #461328 0%, transparent 30%), var(--bg); border-radius: 12px; margin-top: 15px; position: relative; overflow: hidden; }
@@ -49,21 +56,11 @@
         .error-box.visible { display: block; }
         @media (max-width: 600px) { .game { padding: 15px; border-radius: 20px; } .game .cell { width: 30px; height: 30px; border-radius: 7px; font-size: 14px; } .game .stats { gap: 7px; } .game .stat { padding: 9px 4px; } .game .stat-value { font-size: 18px; } }
     </style>
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="description" content="Nosso cantinho especial. Memórias, fotos e muito amor.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
 </head>
 <body>
 
 <div class="topbar"></div>
-<nav class="topnav">
-  <a href="index.html">🏠 início</a>
-  <a href="memorias.html">💌 nossa história</a>
-  <a href="fotos.html">📸 fotos</a>
-  <a href="jogos.html">🎮 minijogos</a>
-  <a href="recados.html">💬 recados</a>
-</nav>
+<!-- NAV INJETADA -->
 
 <div class="container">
   <div class="site-title" style="font-size:32px;">💣 Campo Minado 💣</div>
@@ -72,7 +69,7 @@
           <main class="game">
               <header>
                   <h1 class="title">Campo Minado <span>♥</span></h1>
-                  <p class="subtitle">encontre os corações do bem. evite os corações do mal.</p>
+                  <p class="subtitle">Encontre os corações do bem. Evite os corações do mal.</p>
               </header>
 
               <section class="controls">
@@ -83,7 +80,7 @@
                           <option value="hard">Difícil · 30×16 · 99 ♥</option>
                       </select>
                   </label>
-                  <button id="toggleFlagBtn" class="primary" style="background: #9b5de5;">modo: ☭ cavar</button>
+                  <button id="toggleFlagBtn" class="primary" style="background: #9b5de5;">Modo:  ☭  Cavar</button>
                   <button id="newGame" class="primary">♥ Novo jogo</button>
               </section>
 
@@ -111,52 +108,38 @@
 </div>
 
 <div id="errorBox" class="error-box">
-    <strong>💔</strong>
+    <strong>🫀</strong>
     <div id="errorText"></div>
 </div>
 
 <div class="rodape">Feito por Alberto</div>
-<script src="js/geral.js" defer></script>
 
 <script>
 "use strict";
-
 const Game = (() => {
     const DIFFICULTIES = Object.freeze({
         easy: Object.freeze({ rows: 9, cols: 9, mines: 10 }),
         medium: Object.freeze({ rows: 16, cols: 16, mines: 40 }),
         hard: Object.freeze({ rows: 16, cols: 30, mines: 99 })
     });
-
     const STATES = Object.freeze({ READY: "ready", PLAYING: "playing", WON: "won", LOST: "lost" });
-
     let state = { rows: 16, cols: 16, mines: 40, board: [], gameState: STATES.READY, flags: 0, revealed: 0, timer: 0, timerId: null, firstMove: true };
-    let flagModeActive = false; // Modo de celular para marcar
+    let flagModeActive = false;
     const DOM = {};
-
     function cacheDOM() {
-        DOM.board = document.getElementById("board");
-        DOM.difficulty = document.getElementById("difficulty");
-        DOM.newGame = document.getElementById("newGame");
-        DOM.toggleFlagBtn = document.getElementById("toggleFlagBtn"); // Botão novo
-        DOM.mineCounter = document.getElementById("mineCounter");
-        DOM.timer = document.getElementById("timer");
-        DOM.status = document.getElementById("status");
-        DOM.message = document.getElementById("message");
-        DOM.modal = document.getElementById("cm-modal");
-        DOM.modalIcon = document.getElementById("modalIcon");
-        DOM.modalTitle = document.getElementById("modalTitle");
-        DOM.modalText = document.getElementById("modalText");
-        DOM.modalRestart = document.getElementById("modalRestart");
-        DOM.errorBox = document.getElementById("errorBox");
+        DOM.board = document.getElementById("board"); DOM.difficulty = document.getElementById("difficulty");
+        DOM.newGame = document.getElementById("newGame"); DOM.toggleFlagBtn = document.getElementById("toggleFlagBtn");
+        DOM.mineCounter = document.getElementById("mineCounter"); DOM.timer = document.getElementById("timer");
+        DOM.status = document.getElementById("status"); DOM.message = document.getElementById("message");
+        DOM.modal = document.getElementById("cm-modal"); DOM.modalIcon = document.getElementById("modalIcon");
+        DOM.modalTitle = document.getElementById("modalTitle"); DOM.modalText = document.getElementById("modalText");
+        DOM.modalRestart = document.getElementById("modalRestart"); DOM.errorBox = document.getElementById("errorBox");
         DOM.errorText = document.getElementById("errorText");
     }
-
     function safeNumber(value, fallback = 0) { const number = Number(value); return Number.isFinite(number) ? number : fallback; }
     function clamp(value, min, max) { return Math.max(min, Math.min(max, value)); }
     function randomInt(max) { if (!Number.isInteger(max) || max <= 0) return 0; return Math.floor(Math.random() * max); }
     function isInside(row, col) { return (Number.isInteger(row) && Number.isInteger(col) && row >= 0 && row < state.rows && col >= 0 && col < state.cols); }
-    
     function getNeighbors(row, col) {
         const neighbors = [];
         for (let dr = -1; dr <= 1; dr++) {
@@ -168,7 +151,6 @@ const Game = (() => {
         }
         return neighbors;
     }
-
     function createEmptyBoard() {
         state.board = [];
         for (let row = 0; row < state.rows; row++) {
@@ -179,12 +161,10 @@ const Game = (() => {
             state.board.push(currentRow);
         }
     }
-
     function placeMines(firstRow, firstCol) {
         const forbidden = new Set();
         forbidden.add(`${firstRow}:${firstCol}`);
         for (const cell of getNeighbors(firstRow, firstCol)) forbidden.add(`${cell.row}:${cell.col}`);
-        
         const available = [];
         for (let row = 0; row < state.rows; row++) {
             for (let col = 0; col < state.cols; col++) {
@@ -192,7 +172,6 @@ const Game = (() => {
                 if (!forbidden.has(key)) available.push(state.board[row][col]);
             }
         }
-
         const mineCount = Math.min(state.mines, available.length);
         for (let i = 0; i < mineCount; i++) {
             const randomIndex = randomInt(available.length);
@@ -201,7 +180,6 @@ const Game = (() => {
         }
         calculateNumbers();
     }
-
     function calculateNumbers() {
         for (const row of state.board) {
             for (const cell of row) {
@@ -212,88 +190,58 @@ const Game = (() => {
             }
         }
     }
-
     function renderBoard() {
-        DOM.board.innerHTML = "";
-        DOM.board.style.gridTemplateColumns = `repeat(${state.cols}, 36px)`;
+        DOM.board.innerHTML = ""; DOM.board.style.gridTemplateColumns = `repeat(${state.cols}, 36px)`;
         if (window.innerWidth <= 600) DOM.board.style.gridTemplateColumns = `repeat(${state.cols}, 30px)`;
-
         for (let row = 0; row < state.rows; row++) {
             for (let col = 0; col < state.cols; col++) {
                 const cell = state.board[row][col];
                 const button = document.createElement("button");
-                button.className = "cell"; button.type = "button";
-                button.dataset.row = row; button.dataset.col = col;
-                button.setAttribute("aria-label", "Célula escondida");
+                button.className = "cell"; button.type = "button"; button.dataset.row = row; button.dataset.col = col; button.setAttribute("aria-label", "Célula escondida");
                 cell.element = button;
-                
-                button.addEventListener("click", () => safeAction(() => { 
-                    if (flagModeActive) {
-                        toggleFlag(row, col);
-                    } else {
-                        reveal(row, col); 
-                    }
-                }));
+                button.addEventListener("click", () => safeAction(() => { if (flagModeActive) { toggleFlag(row, col); } else { reveal(row, col); } }));
                 button.addEventListener("contextmenu", event => { event.preventDefault(); safeAction(() => { toggleFlag(row, col); }); });
                 DOM.board.appendChild(button);
             }
         }
     }
-
     function renderCell(cell) {
         if (!cell || !cell.element) return;
-        const element = cell.element;
-        element.className = "cell"; element.textContent = "";
+        const element = cell.element; element.className = "cell"; element.textContent = "";
         if (cell.revealed) {
             element.classList.add("revealed");
             if (cell.mine) {
-                element.classList.add("mine"); element.textContent = "💔";
-                element.setAttribute("aria-label", "Coração partido");
+                element.classList.add("mine"); element.textContent = "🫀"; element.setAttribute("aria-label", "Coração partido");
                 return;
             }
             if (cell.adjacent > 0) {
-                element.textContent = String(cell.adjacent);
-                element.classList.add(`number-${clamp(cell.adjacent, 1, 8)}`);
+                element.textContent = String(cell.adjacent); element.classList.add(`number-${clamp(cell.adjacent, 1, 8)}`);
             }
             element.setAttribute("aria-label", cell.adjacent === 0 ? "Área vazia" : `${cell.adjacent} corações próximos`);
             return;
         }
         if (cell.flagged) {
-            element.classList.add("flagged"); element.textContent = "♥";
-            element.setAttribute("aria-label", "Coração marcado");
+            element.classList.add("flagged"); element.textContent = "♥"; element.setAttribute("aria-label", "Coração marcado");
             return;
         }
         element.setAttribute("aria-label", "Célula escondida");
     }
-
-    function renderAllCells() {
-        for (const row of state.board) { for (const cell of row) renderCell(cell); }
-    }
-
+    function renderAllCells() { for (const row of state.board) { for (const cell of row) renderCell(cell); } }
     function reveal(row, col) {
         if (state.gameState === STATES.WON || state.gameState === STATES.LOST) return;
         if (!isInside(row, col)) return;
         const cell = state.board[row][col];
         if (!cell || cell.flagged || cell.revealed) return;
-
-        if (state.firstMove) {
-            placeMines(row, col);
-            state.firstMove = false; state.gameState = STATES.PLAYING;
-            startTimer();
-        }
-
+        if (state.firstMove) { placeMines(row, col); state.firstMove = false; state.gameState = STATES.PLAYING; startTimer(); }
         if (cell.mine) { cell.revealed = true; loseGame(); return; }
         floodReveal(cell); checkWin(); updateUI();
     }
-
     function floodReveal(startCell) {
         const queue = [startCell]; const visited = new Set();
         while (queue.length > 0) {
-            const cell = queue.shift();
-            if (!cell) continue;
+            const cell = queue.shift(); if (!cell) continue;
             const key = `${cell.row}:${cell.col}`;
-            if (visited.has(key)) continue;
-            visited.add(key);
+            if (visited.has(key)) continue; visited.add(key);
             if (cell.revealed || cell.flagged || cell.mine) continue;
             cell.revealed = true; state.revealed++;
             if (cell.adjacent === 0) {
@@ -304,7 +252,6 @@ const Game = (() => {
         }
         renderAllCells();
     }
-
     function toggleFlag(row, col) {
         if (state.gameState === STATES.WON || state.gameState === STATES.LOST) return;
         if (!isInside(row, col)) return;
@@ -313,18 +260,14 @@ const Game = (() => {
         if (!cell.flagged) {
             if (state.flags >= state.mines) { setMessage("você ja marcou todos os corações.", false); return; }
             cell.flagged = true; state.flags++;
-        } else {
-            cell.flagged = false; state.flags--;
-        }
+        } else { cell.flagged = false; state.flags--; }
         renderCell(cell); updateUI(); checkWin();
     }
-
     function checkWin() {
         if (state.gameState === STATES.LOST || state.gameState === STATES.WON) return;
         const safeCells = state.rows * state.cols - state.mines;
         if (state.revealed >= safeCells) winGame();
     }
-
     function winGame() {
         state.gameState = STATES.WON; stopTimer();
         for (const row of state.board) { for (const cell of row) { if (cell.mine && !cell.flagged) { cell.flagged = true; state.flags++; } } }
@@ -332,85 +275,52 @@ const Game = (() => {
         setMessage("você encontrou todos os corações do bem ♥", true);
         showModal("♥", "pabens", `Você venceu em ${formatTime(state.timer)} segundos.`);
     }
-
     function loseGame() {
         state.gameState = STATES.LOST; stopTimer();
         for (const row of state.board) { for (const cell of row) { if (cell.mine) cell.revealed = true; } }
         renderAllCells(); updateUI();
-        setMessage("um coração partiu </3", false);
-        showModal("</3", "coração partido", "Você pisou em um coração partido.");
+        setMessage("um coração partiu </3", false); showModal("🫀", "coração partido", "Você pisou em um coração real.");
     }
-
-    function startTimer() {
-        stopTimer();
-        state.timerId = setInterval(() => {
-            if (state.gameState !== STATES.PLAYING) { stopTimer(); return; }
-            state.timer++; state.timer = clamp(state.timer, 0, 999999); updateTimer();
-        }, 1000);
-    }
-
+    function startTimer() { stopTimer(); state.timerId = setInterval(() => { if (state.gameState !== STATES.PLAYING) { stopTimer(); return; } state.timer++; state.timer = clamp(state.timer, 0, 999999); updateTimer(); }, 1000); }
     function stopTimer() { if (state.timerId !== null) { clearInterval(state.timerId); state.timerId = null; } }
     function updateTimer() { DOM.timer.textContent = String(state.timer).padStart(3, "0"); }
     function formatTime(seconds) { return String(safeNumber(seconds)).padStart(3, "0"); }
-
     function updateUI() {
-        const remaining = Math.max(0, state.mines - state.flags);
-        DOM.mineCounter.textContent = String(remaining);
-        updateTimer();
-        const symbols = { ready: "♥", playing: "♥", won: "✓", lost: "×" };
-        DOM.status.textContent = symbols[state.gameState] || "♥";
+        const remaining = Math.max(0, state.mines - state.flags); DOM.mineCounter.textContent = String(remaining); updateTimer();
+        const symbols = { ready: "♥", playing: "♥", won: "✓", lost: "×" }; DOM.status.textContent = symbols[state.gameState] || "♥";
     }
-
     function setMessage(text, success) { DOM.message.textContent = text; DOM.message.className = `message ${success ? "win" : "lose"}`; }
     function showModal(icon, title, text) { DOM.modalIcon.textContent = icon; DOM.modalTitle.textContent = title; DOM.modalText.textContent = text; DOM.modal.classList.add("visible"); }
     function hideModal() { DOM.modal.classList.remove("visible"); }
-
     function newGame(difficultyKey) {
         try {
-            const difficulty = DIFFICULTIES[difficultyKey];
-            if (!difficulty) throw new Error("Dificuldade inválida.");
+            const difficulty = DIFFICULTIES[difficultyKey]; if (!difficulty) throw new Error("Dificuldade inválida.");
             stopTimer(); hideModal();
-            state.rows = safeNumber(difficulty.rows, 16);
-            state.cols = safeNumber(difficulty.cols, 16);
-            state.mines = safeNumber(difficulty.mines, 40);
-            const totalCells = state.rows * state.cols;
-            state.mines = clamp(state.mines, 1, Math.max(1, totalCells - 1));
-            state.gameState = STATES.READY;
-            state.flags = 0; state.revealed = 0; state.timer = 0; state.firstMove = true;
+            state.rows = safeNumber(difficulty.rows, 16); state.cols = safeNumber(difficulty.cols, 16); state.mines = safeNumber(difficulty.mines, 40);
+            const totalCells = state.rows * state.cols; state.mines = clamp(state.mines, 1, Math.max(1, totalCells - 1));
+            state.gameState = STATES.READY; state.flags = 0; state.revealed = 0; state.timer = 0; state.firstMove = true;
             createEmptyBoard(); renderBoard(); renderAllCells(); updateUI();
             setMessage("Escolha seu primeiro coração ♥", true);
         } catch (error) { reportError("Não foi possível iniciar o jogo.", error); }
     }
-
-    function safeAction(callback) {
-        try { if (typeof callback !== "function") throw new Error("Ação inválida."); callback(); } 
-        catch (error) { reportError("O jogo encontrou um erro, mas tentou continuar.", error); try { validateState(); } catch (validationError) { newGame(DOM.difficulty.value || "medium"); } }
-    }
-
+    function safeAction(callback) { try { if (typeof callback !== "function") throw new Error("Ação inválida."); callback(); } catch (error) { reportError("O jogo encontrou um erro, mas tentou continuar.", error); try { validateState(); } catch (validationError) { newGame(DOM.difficulty.value || "medium"); } } }
     function validateState() { return true; }
     function reportError(message, error) { DOM.errorText.textContent = `${message} ${error?.message || ""}`; DOM.errorBox.classList.add("visible"); setTimeout(() => { DOM.errorBox.classList.remove("visible"); }, 6000); }
-
     function setupEvents() {
         DOM.newGame.addEventListener("click", () => safeAction(() => { newGame(DOM.difficulty.value); }));
         DOM.difficulty.addEventListener("change", () => safeAction(() => { newGame(DOM.difficulty.value); }));
         DOM.modalRestart.addEventListener("click", () => safeAction(() => { newGame(DOM.difficulty.value); }));
         DOM.modal.addEventListener("click", event => { if (event.target === DOM.modal) hideModal(); });
-        
-        // BOTÃO DE ALTERNAR MODO
         DOM.toggleFlagBtn.addEventListener("click", () => {
             flagModeActive = !flagModeActive;
-            DOM.toggleFlagBtn.textContent = flagModeActive ? "modo: △ marcar" : "modo: ☭ cavar";
+            DOM.toggleFlagBtn.textContent = flagModeActive ? "Modo: ◇ Marcar" : "Modo:  ☭  Cavar";
             DOM.toggleFlagBtn.style.background = flagModeActive ? "#ff477e" : "#9b5de5";
         });
     }
-
     function init() { try { cacheDOM(); setupEvents(); newGame("medium"); } catch (error) { console.error(error); } }
-
     return { init, newGame };
 })();
-
 if (document.readyState === "loading") { document.addEventListener("DOMContentLoaded", Game.init); } else { Game.init(); }
 </script>
-
 </body>
 </html>

@@ -4,6 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta name="description" content="Jogo da Memória do casal.">
+<meta property="og:title" content="♥ Jogo da Memória ♥">
+<meta property="og:description" content="Ache os pares das nossas fotos!">
+<meta property="og:image" content="images/casal2022.jpg">
+<meta property="og:type" content="website">
 <title>♥ Jogo da Memória ♥</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧠</text></svg>">
 <link rel="stylesheet" href="css/style.css">
@@ -12,22 +16,19 @@
 <body>
 <div class="topbar"></div>
 <!-- NAV INJETADA -->
-
 <div class="container">
   <div class="site-title title-lg">🧠 Jogo da Memória 🧠</div>
   <div class="box">
     <h2>Como jogar</h2>
-    <p>Clica nas cartinhas pra virar e ache os pares das nossas fotos!</p>
+    <p>clica nas cartas pra virar e ache os pares das fotos</p>
     <p id="memoria-status">Tentativas: 0 | Pares encontrados: 0 / 6</p>
     <div class="btn-container">
       <button class="btn-retro" onclick="reiniciarJogo()">🔄 Reiniciar</button>
     </div>
   </div>
-
   <div class="memoria-grid" id="memoria-grid"></div>
-
   <div id="vitoria" class="banner-especial text-md" style="display:none;">
-    🎉 VOCÊ GANHOU! 🎉 💗
+     pabens voce ganhou  💗
   </div>
 </div>
 <div class="rodape">Feito por Alberto</div>
@@ -36,9 +37,7 @@ const fotosJogo = [
   "images/casal2022.jpg", "images/daee.jpg", "images/sesc.jpg",
   "images/planta.jpg", "images/feliz_gato.jpg", "images/festinha2022.jpg"
 ];
-
 let cartasViradas = []; let paresEncontrados = 0; let tentativas = 0; let travado = false;
-
 function embaralhar(array) {
   const copia = [...array, ...array];
   for (let i = copia.length - 1; i > 0; i--) {
@@ -47,12 +46,10 @@ function embaralhar(array) {
   }
   return copia;
 }
-
 function criarTabuleiro() {
   const grid = document.getElementById("memoria-grid");
   grid.innerHTML = "";
   const baralho = embaralhar(fotosJogo);
-
   baralho.forEach((foto, index) => {
     const carta = document.createElement("div");
     carta.className = "carta"; carta.dataset.foto = foto;
@@ -61,11 +58,9 @@ function criarTabuleiro() {
     grid.appendChild(carta);
   });
 }
-
 function virarCarta(carta) {
   if (travado || carta.classList.contains("virada") || carta.classList.contains("acertada") || cartasViradas.length >= 2) return;
   carta.classList.add("virada"); cartasViradas.push(carta);
-
   if (cartasViradas.length === 2) {
     tentativas++;
     document.getElementById("memoria-status").textContent = `Tentativas: ${tentativas} | Pares encontrados: ${paresEncontrados} / ${fotosJogo.length}`;
@@ -84,7 +79,6 @@ function virarCarta(carta) {
     }
   }
 }
-
 function reiniciarJogo() {
   cartasViradas = []; paresEncontrados = 0; tentativas = 0; travado = false;
   document.getElementById("vitoria").style.display = "none";
