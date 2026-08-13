@@ -2,6 +2,11 @@
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 
+// Headers para MATAR o cache agressivo de navegadores mobile
+header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+header('Cache-Control: post-check=0, pre-check=0', false);
+header('Pragma: no-cache');
+
 $action = isset($_GET['action']) ? $_GET['action'] : '';
 
 function get_data($file) {
@@ -20,7 +25,6 @@ function save_data($file, $new_item) {
     file_put_contents($file, json_encode($data, JSON_PRETTY_PRINT));
 }
 
-// Sanitização robusta contra injeções
 function sanitize($input) {
     return htmlspecialchars(strip_tags(trim($input)), ENT_QUOTES, 'UTF-8');
 }
@@ -31,7 +35,6 @@ if ($action === 'get_recados') {
     $raw = file_get_contents('php://input');
     $data = json_decode($raw, true);
     if (json_last_error() === JSON_ERROR_NONE && $data && isset($data['texto'])) {
-        // Sanitiza os campos antes de salvar
         $data['nome'] = sanitize($data['nome'] ?? 'Anônimo');
         $data['texto'] = sanitize($data['texto']);
         $data['email'] = sanitize($data['email'] ?? '');
@@ -54,7 +57,7 @@ if ($action === 'get_recados') {
         $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
         
         if (!in_array($ext, $allowed)) {
-             echo json_encode(["status" => "erro", "message" => "Apenas imagens (jpg, png, gif) são permitidas."]);
+             echo json_encode(["status" => "erro", "message" => "Apenas imagens (jpg, png, gif, webp) são permitidas."]);
              exit;
         }
 
@@ -62,7 +65,6 @@ if ($action === 'get_recados') {
         $targetPath = $uploadDir . $fileName;
 
         if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetPath)) {
-            // Sanitiza os campos antes de salvar
             $desc = isset($_POST['desc']) ? sanitize($_POST['desc']) : '';
             $email = isset($_POST['email']) ? sanitize($_POST['email']) : '';
             
