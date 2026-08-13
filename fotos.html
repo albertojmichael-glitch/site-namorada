@@ -2,7 +2,6 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>♥ Galeria de Fotos ♥</title>
 <link rel="stylesheet" href="css/style.css">
 <style>
@@ -17,6 +16,10 @@ input[type="file"] {
     cursor: pointer;
 }
 </style>
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Nosso cantinho especial. Memórias, fotos e muito amor.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
 </head>
 <body>
 <div class="topbar"></div>
@@ -33,7 +36,6 @@ input[type="file"] {
 
   <div class="box" style="text-align: center;">
     <h3>Adicionar Nova Foto 📸</h3>
-    <!-- Mudei para tipo "file" para carregar do PC/Celular -->
     <input type="file" id="file-foto" accept="image/*">
     <input type="text" id="desc-foto" placeholder="Descrição da foto">
     <button class="btn-retro" onclick="adicionarNovaFoto()">Adicionar ao Álbum</button>
@@ -42,25 +44,23 @@ input[type="file"] {
   <div class="banner-especial" style="font-size:18px;">memórias incriveis</div>
   <div class="box">
     <div class="galeria" id="galeria-fotos">
-      <!-- Fotos fixas originais e novas adicionadas via código -->
-      <div class="foto-card"><img src="images/casal2022.jpg" alt="a gente 2022"><p>a gente 2022</p></div>
-      <div class="foto-card"><img src="images/daee.jpg" alt="a gente no daee"><p>a gente no daee</p></div>
-      <div class="foto-card"><img src="images/sesc.jpg" alt="a gente no sesc"><p>a gente no sesc</p></div>
-      <div class="foto-card"><img src="images/pedido.jpeg" alt="dias antes do pedido"><p>dias antes do pedido</p></div>
-      <div class="foto-card"><img src="images/sesc2.jpeg" alt="sesc novamente"><p>sesc novamente</p></div>
-      <div class="foto-card"><img src="images/sesc3.jpeg" alt="tarde no sesc"><p>tarde no sesc</p></div>
-      <div class="foto-card"><img src="images/sombrio.jpeg" alt="eu sombrio"><p>eu sombrio</p></div>
-      <div class="foto-card"><img src="images/crianca.jpg" alt="eu criança"><p>eu criança</p></div>
-      <div class="foto-card"><img src="images/daee2.jpg" alt="eu no daee"><p>eu no daee</p></div>
-      <div class="foto-card"><img src="images/daee3.jpeg" alt="a gente no daee 2"><p>a gente no daee 2</p></div>
-      <div class="foto-card"><img src="images/feliz_gato.jpg" alt="eu e o Feliz"><p>eu e o Feliz</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/casal2022.jpg" alt="a gente 2022"><p>a gente 2022</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/daee.jpg" alt="a gente no daee"><p>a gente no daee</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/sesc.jpg" alt="a gente no sesc"><p>a gente no sesc</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/pedido.jpeg" alt="dias antes do pedido"><p>dias antes do pedido</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/sesc2.jpeg" alt="sesc novamente"><p>sesc novamente</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/sesc3.jpeg" alt="tarde no sesc"><p>tarde no sesc</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/sombrio.jpeg" alt="eu sombrio"><p>eu sombrio</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/crianca.jpg" alt="eu criança"><p>eu criança</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/daee2.jpg" alt="eu no daee"><p>eu no daee</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/daee3.jpeg" alt="a gente no daee 2"><p>a gente no daee 2</p></div>
+      <div class="foto-card"><img loading="lazy" src="images/feliz_gato.jpg" alt="eu e o Feliz"><p>eu e o Feliz</p></div>
     </div>
   </div>
 </div>
 <div class="rodape">Feito por Alberto</div>
-<script src="js/geral.js"></script>
+<script src="js/geral.js" defer></script>
 <script>
-// ================= INTEGRAÇÃO COM BACKEND PHP =================
 async function carregarFotosExtras() {
   try {
     const res = await fetch("api.php?action=get_fotos");
@@ -70,11 +70,11 @@ async function carregarFotosExtras() {
     fotos.forEach(f => {
       const novaDiv = document.createElement("div");
       novaDiv.className = "foto-card";
-      novaDiv.innerHTML = `<img src="${f.url}" alt="${f.desc}"><p>${f.desc}</p><p style="font-size:10px;color:#999">Por: ${f.email}</p>`;
+      novaDiv.innerHTML = `<img loading="lazy" src="${f.url}" alt="${f.desc}"><p>${f.desc}</p><p style="font-size:10px;color:#999">Por: ${f.email}</p>`;
       galeria.appendChild(novaDiv);
     });
   } catch(e) {
-    console.log("Backend offline, mostrando apenas fotos locais.");
+    console.log("Backend offline.");
   }
 }
 
@@ -82,42 +82,35 @@ function adicionarNovaFoto() {
   const fileInput = document.getElementById("file-foto");
   const desc = document.getElementById("desc-foto").value.trim();
   
-  if(fileInput.files.length === 0) return alert("Ei, faltou escolher a foto do seu dispositivo!");
-  if(!desc) return alert("Coloque uma descrição para a foto!");
+  if(fileInput.files.length === 0) return alert("Escolha a foto!");
+  if(!desc) return alert("Coloque uma descrição!");
   
   const fotoFile = fileInput.files[0];
   
   garantirEmail(async (email) => {
-    // Para enviar arquivos para o PHP, usamos FormData em vez de JSON string
     const formData = new FormData();
     formData.append("foto", fotoFile);
     formData.append("desc", desc);
     formData.append("email", email);
 
     try {
-      // Trocando o "Enviando..." no botão pra pessoa saber que tá carregando
       const btn = document.querySelector("button.btn-retro");
       const btnOriginalText = btn.innerText;
-      btn.innerText = "Carregando foto... ⏳";
+      btn.innerText = "Carregando... ⏳";
       
-      const res = await fetch("api.php?action=upload_foto", {
-        method: "POST",
-        body: formData
-      });
-      
+      const res = await fetch("api.php?action=upload_foto", { method: "POST", body: formData });
       const resultado = await res.json();
       
       btn.innerText = btnOriginalText;
       
       if (resultado.status === "sucesso") {
-          alert("Foto enviada e salva para sempre na nossa história! ✨");
+          alert("Foto enviada! ✨");
           setTimeout(() => location.reload(), 1500);
       } else {
           alert("Erro: " + (resultado.message || "Desconhecido"));
       }
     } catch(e) {
-      alert("Erro ao conectar no servidor.");
-      document.querySelector("button.btn-retro").innerText = "Adicionar ao Álbum";
+      alert("Erro no servidor.");
     }
   });
 }

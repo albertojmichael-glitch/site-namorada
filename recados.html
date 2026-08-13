@@ -2,9 +2,12 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>♥ Recados ♥</title>
 <link rel="stylesheet" href="css/style.css">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Nosso cantinho especial. Memórias, fotos e muito amor.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
 </head>
 <body>
 <div class="topbar"></div>
@@ -32,9 +35,8 @@
   </div>
 </div>
 <div class="rodape">Feito por Alberto</div>
-<script src="js/geral.js"></script>
+<script src="js/geral.js" defer></script>
 <script>
-// ================= INTEGRAÇÃO COM BACKEND PHP =================
 async function carregarRecados() {
   try {
     const res = await fetch("api.php?action=get_recados");
@@ -53,7 +55,7 @@ async function carregarRecados() {
       </div>
     `).join("");
   } catch (error) {
-    document.getElementById("lista-recados").innerHTML = "<p>Nenhum recado ainda... seja a primeira! 💗 (ou o backend não está rodando)</p>";
+    document.getElementById("lista-recados").innerHTML = "<p>Nenhum recado ainda...</p>";
   }
 }
 
@@ -62,7 +64,7 @@ function enviarRecado() {
   const texto = document.getElementById("recado-texto").value.trim();
   
   if (!nome || !texto) {
-    alert("Preenche o nome e a mensagem antes de enviar! 😄");
+    alert("Preenche o nome e a mensagem! 😄");
     return;
   }
   
@@ -76,10 +78,10 @@ function enviarRecado() {
       });
       document.getElementById("recado-nome").value = "";
       document.getElementById("recado-texto").value = "";
-      alert("Recadinho guardado no coração e no servidor! 💖");
+      alert("Recadinho guardado! 💖");
       carregarRecados();
     } catch(e) {
-      alert("Erro ao conectar no servidor. Mas o que vale é a intenção!");
+      alert("Erro ao conectar.");
     }
   });
 }
