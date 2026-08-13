@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div class="topbar"></div>
 <nav class="topnav">
   <a href="index.html">🏠 início</a>
@@ -16,124 +15,67 @@
   <a href="recados.html">💬 recados</a>
 </nav>
 
-
 <div class="container">
-
   <div class="site-title" style="font-size:32px;"> Galeria de Fotos </div>
 
   <div class="box" style="text-align: center;">
-  <h3>Adicionar Nova Foto 📸</h3>
-  <input type="text" id="url-foto" placeholder="Cole o link (URL) da imagem aqui">
-  <input type="text" id="desc-foto" placeholder="Descrição da foto">
-  <button class="btn-retro" onclick="adicionarNovaFoto()">Adicionar</button>
+    <h3>Adicionar Nova Foto 📸</h3>
+    <input type="text" id="url-foto" placeholder="Cole o link (URL) da imagem aqui">
+    <input type="text" id="desc-foto" placeholder="Descrição da foto">
+    <button class="btn-retro" onclick="adicionarNovaFoto()">Adicionar ao Álbum</button>
   </div>
 
-  <div class="banner-especial" style="font-size:18px;">
-    memórias incriveis
-  </div>
-
+  <div class="banner-especial" style="font-size:18px;">memórias incriveis</div>
   <div class="box">
-    <div class="galeria">
-
-      <div class="foto-card">
-        <img src="images/casal2022.jpg" alt="a gente 2022">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/daee.jpg" alt="a gente no daee">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/sesc.jpg" alt="a gente no sesc">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/pedido.jpeg" alt="dias antes do pedido">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/daee2.jpg" alt="eu no daee">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/planta.jpg" alt="eu com a planta">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/sombrio.jpeg" alt="eu sombrio">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/assustado.jpg" alt="eu assustado">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/crianca.jpg" alt="eu criança">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/feliz_gato.jpg" alt="eu e o Feliz">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/festinha2022.jpg" alt="festinha em casa 2022">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/daee3.jpeg" alt="a gente no daee 2">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/sesc2.jpeg" alt="sesc novamente">
-      </div>
-
-      <div class="foto-card">
-        <img src="images/sesc3.jpeg" alt="tarde no sesc">
-      </div>
-
+    <div class="galeria" id="galeria-fotos">
+      <!-- Fotos fixas originais -->
+      <div class="foto-card"><img src="images/casal2022.jpg" alt="a gente 2022"></div>
+      <div class="foto-card"><img src="images/daee.jpg" alt="a gente no daee"></div>
+      <div class="foto-card"><img src="images/sesc.jpg" alt="a gente no sesc"></div>
+      <div class="foto-card"><img src="images/pedido.jpeg" alt="dias antes do pedido"></div>
     </div>
   </div>
-
 </div>
-
-<div class="rodape">
-  Feito por Alberto
-</div>
-
+<div class="rodape">Feito por Alberto</div>
 <script src="js/geral.js"></script>
-
-
 <script>
-  function carregarFotosExtras() {
-    const galeria = document.querySelector(".galeria");
-    const fotos = JSON.parse(localStorage.getItem("fotosExtras") || "[]");
+// ================= INTEGRAÇÃO COM BACKEND PHP =================
+async function carregarFotosExtras() {
+  try {
+    const res = await fetch("api.php?action=get_fotos");
+    const fotos = await res.json();
+    const galeria = document.getElementById("galeria-fotos");
     
     fotos.forEach(f => {
       const novaDiv = document.createElement("div");
       novaDiv.className = "foto-card";
-      novaDiv.innerHTML = `<img src="${f.url}" alt="${f.desc}"><p>${f.desc}</p>`;
+      novaDiv.innerHTML = `<img src="${f.url}" alt="${f.desc}"><p>${f.desc}</p><p style="font-size:10px;color:#999">Por: ${f.email}</p>`;
       galeria.appendChild(novaDiv);
     });
+  } catch(e) {
+    console.log("Backend offline, mostrando apenas fotos locais.");
   }
+}
 
-  function adicionarNovaFoto() {
-    const url = document.getElementById("url-foto").value;
-    const desc = document.getElementById("desc-foto").value;
-    
-    if(!url) return alert("Coloque o link da foto!");
-    
-    const fotos = JSON.parse(localStorage.getItem("fotosExtras") || "[]");
-    fotos.push({ url, desc });
-    localStorage.setItem("fotosExtras", JSON.stringify(fotos));
-    
-    location.reload(); 
-  }
-
-  document.addEventListener("DOMContentLoaded", carregarFotosExtras);
+function adicionarNovaFoto() {
+  const url = document.getElementById("url-foto").value.trim();
+  const desc = document.getElementById("desc-foto").value.trim();
+  if(!url) return alert("Ei, faltou colocar o link da foto!");
+  
+  garantirEmail(async (email) => {
+    const novaFoto = { url, desc, email };
+    try {
+      await fetch("api.php?action=add_foto", {
+        method: "POST", body: JSON.stringify(novaFoto)
+      });
+      alert("Foto salva para sempre na nossa história! ✨");
+      setTimeout(() => location.reload(), 1500);
+    } catch(e) {
+      alert("Erro ao conectar no servidor.");
+    }
+  });
+}
+document.addEventListener("DOMContentLoaded", carregarFotosExtras);
 </script>
-
-
-
-
 </body>
 </html>

@@ -6,7 +6,6 @@
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div class="topbar"></div>
 <nav class="topnav">
   <a href="index.html">🏠 início</a>
@@ -17,82 +16,73 @@
 </nav>
 
 <div class="container">
-
   <div class="site-title" style="font-size:30px;">💬 Livro de Recados 💬</div>
-
   <div class="box">
     <h2>Deixe um recadinho ✎</h2>
-    <input type="text" id="recado-nome" placeholder="Seu nome">
+    <input type="text" id="recado-nome" placeholder="Seu apelido carinhoso">
     <textarea id="recado-texto" rows="4" placeholder="Escreva sua mensagem aqui..."></textarea>
     <div style="text-align:center;">
       <button class="btn-retro" onclick="enviarRecado()">💌 Enviar Recado</button>
     </div>
   </div>
-
   <div class="box">
     <h2>Recados ✿</h2>
-    <div id="lista-recados"></div>
+    <div id="lista-recados"><p>Carregando recados do servidor...</p></div>
   </div>
-
 </div>
-
-<div class="rodape">
-  Feito por Alberto
-</div>
-
+<div class="rodape">Feito por Alberto</div>
 <script src="js/geral.js"></script>
 <script>
-// ================= LIVRO DE RECADOS =================
-// Os recados ficam salvos no navegador de quem escreveu (localStorage).
-// Obs: como é salvo local, cada pessoa/dispositivo vê os recados que
-// escreveu no próprio navegador.
-
-function carregarRecados() {
-  return JSON.parse(localStorage.getItem("recadosSite") || "[]");
-}
-
-function salvarRecados(lista) {
-  localStorage.setItem("recadosSite", JSON.stringify(lista));
-}
-
-function renderRecados() {
-  const lista = carregarRecados();
-  const container = document.getElementById("lista-recados");
-  if (lista.length === 0) {
-    container.innerHTML = "<p>Nenhum recado ainda... seja a primeira! 💗</p>";
-    return;
-  }
-  container.innerHTML = lista
-    .slice()
-    .reverse()
-    .map(r => `
+// ================= INTEGRAÇÃO COM BACKEND PHP =================
+async function carregarRecados() {
+  try {
+    const res = await fetch("api.php?action=get_recados");
+    const lista = await res.json();
+    const container = document.getElementById("lista-recados");
+    
+    if (lista.length === 0) {
+      container.innerHTML = "<p>Nenhum recado ainda... seja a primeira! 💗</p>";
+      return;
+    }
+    
+    container.innerHTML = lista.slice().reverse().map(r => `
       <div class="recado-item">
         <span>${r.data}</span>
         <b>${r.nome}:</b> ${r.texto}
       </div>
     `).join("");
+  } catch (error) {
+    document.getElementById("lista-recados").innerHTML = "<p>Nenhum recado ainda... seja a primeira! 💗 (ou o backend não está rodando)</p>";
+  }
 }
 
 function enviarRecado() {
   const nome = document.getElementById("recado-nome").value.trim();
   const texto = document.getElementById("recado-texto").value.trim();
+  
   if (!nome || !texto) {
     alert("Preenche o nome e a mensagem antes de enviar! 😄");
     return;
   }
-  const lista = carregarRecados();
-  lista.push({
-    nome,
-    texto,
-    data: new Date().toLocaleDateString("pt-BR")
+  
+  garantirEmail(async (email) => {
+    const novoRecado = { nome, texto, email, data: new Date().toLocaleDateString("pt-BR") };
+    
+    try {
+      await fetch("api.php?action=add_recado", {
+        method: "POST",
+        body: JSON.stringify(novoRecado)
+      });
+      document.getElementById("recado-nome").value = "";
+      document.getElementById("recado-texto").value = "";
+      alert("Recadinho guardado no coração e no servidor! 💖");
+      carregarRecados();
+    } catch(e) {
+      alert("Erro ao conectar no servidor. Mas o que vale é a intenção!");
+    }
   });
-  salvarRecados(lista);
-  document.getElementById("recado-nome").value = "";
-  document.getElementById("recado-texto").value = "";
-  renderRecados();
 }
-
-renderRecados();
+carregarRecados();
 </script>
 </body>
 </html>
