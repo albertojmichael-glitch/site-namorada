@@ -39,3 +39,23 @@ document.addEventListener("DOMContentLoaded", function () {
   atualizarContador();
   iniciarCoracoesClique();
 });
+
+
+function pedirEmailLogin() {
+  const emailLogado = localStorage.getItem("usuarioEmail");
+  if (!emailLogado) {
+    const email = prompt("💖 Bem-vindo! Por favor, insira seu e-mail para entrar:");
+    if (email) {
+      localStorage.setItem("usuarioEmail", email);
+      alert("Login feito com sucesso, " + email + "!");
+    } else {
+      alert("Você precisa de um e-mail para acessar nossas memórias!");
+      pedirEmailLogin(); // Força a colocar o email
+    }
+  }
+}
+
+// Chame a função quando a página carregar
+document.addEventListener("DOMContentLoaded", function () {
+  pedirEmailLogin();
+});

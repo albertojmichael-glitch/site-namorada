@@ -21,6 +21,13 @@
 
   <div class="site-title" style="font-size:32px;"> Galeria de Fotos </div>
 
+  <div class="box" style="text-align: center;">
+  <h3>Adicionar Nova Foto 📸</h3>
+  <input type="text" id="url-foto" placeholder="Cole o link (URL) da imagem aqui">
+  <input type="text" id="desc-foto" placeholder="Descrição da foto">
+  <button class="btn-retro" onclick="adicionarNovaFoto()">Adicionar</button>
+  </div>
+
   <div class="banner-especial" style="font-size:18px;">
     memórias incriveis
   </div>
@@ -94,5 +101,39 @@
 </div>
 
 <script src="js/geral.js"></script>
+
+
+<script>
+  function carregarFotosExtras() {
+    const galeria = document.querySelector(".galeria");
+    const fotos = JSON.parse(localStorage.getItem("fotosExtras") || "[]");
+    
+    fotos.forEach(f => {
+      const novaDiv = document.createElement("div");
+      novaDiv.className = "foto-card";
+      novaDiv.innerHTML = `<img src="${f.url}" alt="${f.desc}"><p>${f.desc}</p>`;
+      galeria.appendChild(novaDiv);
+    });
+  }
+
+  function adicionarNovaFoto() {
+    const url = document.getElementById("url-foto").value;
+    const desc = document.getElementById("desc-foto").value;
+    
+    if(!url) return alert("Coloque o link da foto!");
+    
+    const fotos = JSON.parse(localStorage.getItem("fotosExtras") || "[]");
+    fotos.push({ url, desc });
+    localStorage.setItem("fotosExtras", JSON.stringify(fotos));
+    
+    location.reload(); 
+  }
+
+  document.addEventListener("DOMContentLoaded", carregarFotosExtras);
+</script>
+
+
+
+
 </body>
 </html>
