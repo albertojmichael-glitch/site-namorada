@@ -35,7 +35,7 @@ function criarModalDOM() {
       <div class="modal-box">
         <h3 id="modal-titulo">Aviso</h3>
         <p id="modal-mensagem"></p>
-        <input type="text" id="modal-input" style="display:none;" placeholder="Digite aqui...">
+        <input type="text" id="modal-input" style="display:none;" placeholder="exemplo@email.com">
         <div class="modal-botoes">
           <button class="btn-retro" id="btn-modal-ok">OK</button>
           <button class="btn-retro" id="btn-modal-cancelar" style="display:none;">Cancelar</button>
@@ -66,7 +66,7 @@ function garantirEmail(callback) {
   
   criarModalDOM();
   document.getElementById('modal-titulo').innerText = "Identifique-se 💌";
-  document.getElementById('modal-mensagem').innerText = "Para deixar uma marca na nossa história, digite seu nome ou email:";
+  document.getElementById('modal-mensagem').innerText = "Para deixar uma marca na nossa história, digite seu e-mail:";
   
   const input = document.getElementById('modal-input');
   input.style.display = 'block'; input.value = '';
@@ -80,12 +80,18 @@ function garantirEmail(callback) {
   
   btnOk.onclick = () => {
     const email = input.value.trim();
-    if (email) {
+    
+    // Regra (Regex) para validar se o email tem formato real: texto@texto.texto
+    const regexEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email) {
+      alert("Precisamos saber quem é você para salvar!");
+    } else if (!regexEmail.test(email)) {
+      alert("Opa! Parece que esse e-mail não é válido.\nTente algo como: nome@email.com");
+    } else {
       localStorage.setItem("usuarioEmail", email);
       overlay.style.display = 'none';
       callback(email);
-    } else {
-      alert("Precisamos saber quem é você para salvar!");
     }
   };
   btnCancelar.onclick = () => { overlay.style.display = 'none'; };
