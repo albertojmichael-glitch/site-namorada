@@ -136,6 +136,7 @@
                           <option value="hard">Difícil · 30×16 · 99 ♥</option>
                       </select>
                   </label>
+                  <button id="toggleFlagBtn" class="primary" style="background: #9b5de5;">Modo: ⛏️ Cavar</button>
                   <button id="newGame" class="primary">♥ Novo jogo</button>
               </section>
 
@@ -147,7 +148,7 @@
 
               <div id="board-wrapper"><div id="board"></div></div>
               <div id="message" class="message"></div>
-              <div class="help">Clique esquerdo para revelar · Clique direito para colocar</div>
+              <div class="help">PC: Botão direito p/ marcar | Celular: Use o botão de Modo acima</div>
           </main>
 
           <div id="cm-modal">
@@ -183,12 +184,14 @@ const Game = (() => {
     const STATES = Object.freeze({ READY: "ready", PLAYING: "playing", WON: "won", LOST: "lost" });
 
     let state = { rows: 16, cols: 16, mines: 40, board: [], gameState: STATES.READY, flags: 0, revealed: 0, timer: 0, timerId: null, firstMove: true };
+    let flagModeActive = false; // Modo de celular para marcar
     const DOM = {};
 
     function cacheDOM() {
         DOM.board = document.getElementById("board");
         DOM.difficulty = document.getElementById("difficulty");
         DOM.newGame = document.getElementById("newGame");
+        DOM.toggleFlagBtn = document.getElementById("toggleFlagBtn"); // Botão novo
         DOM.mineCounter = document.getElementById("mineCounter");
         DOM.timer = document.getElementById("timer");
         DOM.status = document.getElementById("status");
@@ -276,7 +279,15 @@ const Game = (() => {
                 button.dataset.row = row; button.dataset.col = col;
                 button.setAttribute("aria-label", "Célula escondida");
                 cell.element = button;
-                button.addEventListener("click", () => safeAction(() => { reveal(row, col); }));
+                
+                // MUDANÇA AQUI PARA O MODO CELULAR
+                button.addEventListener("click", () => safeAction(() => { 
+                    if (flagModeActive) {
+                        toggleFlag(row, col);
+                    } else {
+                        reveal(row, col); 
+                    }
+                }));
                 button.addEventListener("contextmenu", event => { event.preventDefault(); safeAction(() => { toggleFlag(row, col); }); });
                 DOM.board.appendChild(button);
             }
@@ -381,7 +392,6 @@ const Game = (() => {
         for (const row of state.board) { for (const cell of row) { if (cell.mine) cell.revealed = true; } }
         renderAllCells(); updateUI();
         setMessage("um coração partiu </3", false);
-        // BUG FIX AQUI: Estava faltando o texto e tinha vírgula sobrando no código original
         showModal("</3", "coração partido", "Você pisou em um coração partido.");
     }
 
@@ -439,6 +449,13 @@ const Game = (() => {
         DOM.difficulty.addEventListener("change", () => safeAction(() => { newGame(DOM.difficulty.value); }));
         DOM.modalRestart.addEventListener("click", () => safeAction(() => { newGame(DOM.difficulty.value); }));
         DOM.modal.addEventListener("click", event => { if (event.target === DOM.modal) hideModal(); });
+        
+        // BOTÃO DE ALTERNAR MODO
+        DOM.toggleFlagBtn.addEventListener("click", () => {
+            flagModeActive = !flagModeActive;
+            DOM.toggleFlagBtn.textContent = flagModeActive ? "Modo: 🚩 Marcar" : "Modo: ⛏️ Cavar";
+            DOM.toggleFlagBtn.style.background = flagModeActive ? "#ff477e" : "#9b5de5";
+        });
     }
 
     function init() { try { cacheDOM(); setupEvents(); newGame("medium"); } catch (error) { console.error(error); } }
