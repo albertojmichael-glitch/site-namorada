@@ -19,8 +19,8 @@
   <div class="site-title title-lg">💬 Livro de Recados 💬</div>
   <div class="box">
     <h2>Deixe um recadinho ✎</h2>
-    <input type="text" id="recado-nome" placeholder="Seu apelido carinhoso">
-    <textarea id="recado-texto" rows="4" placeholder="Escreva sua mensagem aqui..."></textarea>
+    <input type="text" id="recado-nome" placeholder="seu apelido">
+    <textarea id="recado-texto" rows="4" placeholder="escreva sua mensagem aqui."></textarea>
     <div class="btn-container">
       <button class="btn-retro" onclick="enviarRecado()">💌 Enviar Recado</button>
     </div>
@@ -39,25 +39,25 @@ async function carregarRecados() {
     const lista = await res.json();
     const container = document.getElementById("lista-recados");
     if (lista.length === 0) {
-      container.innerHTML = "<p>Nenhum recado ainda... seja a primeira! 💗</p>";
+      container.innerHTML = "<p>Nenhum recado ainda.💗</p>";
       return;
     }
     container.innerHTML = lista.slice().reverse().map(r => `
       <div class="recado-item"><span>${r.data}</span><b>${r.nome}:</b> ${r.texto}</div>
     `).join("");
-  } catch (error) { document.getElementById("lista-recados").innerHTML = "<p>Nenhum recado ainda...</p>"; }
+  } catch (error) { document.getElementById("lista-recados").innerHTML = "<p>nenhum recado ainda</p>"; }
 }
 function enviarRecado() {
   const nome = document.getElementById("recado-nome").value.trim();
   const texto = document.getElementById("recado-texto").value.trim();
-  if (!nome || !texto) { alert("Preenche o nome e a mensagem! 😄"); return; }
+  if (!nome || !texto) { alert("preencha o nome e a mensagem"); return; }
   garantirEmail(async (email) => {
     const novoRecado = { nome, texto, email, data: new Date().toLocaleDateString("pt-BR") };
     try {
       await fetch("api.php?action=add_recado", { method: "POST", body: JSON.stringify(novoRecado) });
       document.getElementById("recado-nome").value = "";
       document.getElementById("recado-texto").value = "";
-      alert("Recadinho guardado! 💖");
+      alert("recado guardado 💖");
       carregarRecados();
     } catch(e) { alert("Erro ao conectar."); }
   });
