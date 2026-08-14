@@ -30,7 +30,7 @@
     <input type="text" id="recado-nome" placeholder="seu apelido">
     <textarea id="recado-texto" rows="4" placeholder="escreva sua mensagem aqui..."></textarea>
     <div class="btn-container">
-      <button class="btn-retro" onclick="enviarRecado()">💌 enviar Recado</button>
+      <button class="btn-retro" onclick="enviarRecado()">💌 enviar recado</button>
     </div>
   </div>
   <div class="box">
@@ -47,7 +47,7 @@ async function carregarRecados() {
     const lista = await res.json();
     const container = document.getElementById("lista-recados");
     if (lista.length === 0) {
-      container.innerHTML = "<p>nenhum recado ainda...💗</p>";
+      container.innerHTML = "<p>nenhum recado ainda.💗</p>";
       return;
     }
     container.innerHTML = lista.slice().reverse().map(r => `

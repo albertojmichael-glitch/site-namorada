@@ -285,7 +285,7 @@ const Game = (() => {
         state.gameState = STATES.LOST; stopTimer();
         for (const row of state.board) { for (const cell of row) { if (cell.mine) cell.revealed = true; } }
         renderAllCells(); updateUI();
-        setMessage("um coração partiu </3", false); showModal("🫀", "coração partido", "Você pisou em um coração real.");
+        setMessage("um coração partiu 🫀", false); showModal("🫀", "coração partido", "Você pisou em um coração real.");
     }
     function startTimer() { stopTimer(); state.timerId = setInterval(() => { if (state.gameState !== STATES.PLAYING) { stopTimer(); return; } state.timer++; state.timer = clamp(state.timer, 0, 999999); updateTimer(); }, 1000); }
     function stopTimer() { if (state.timerId !== null) { clearInterval(state.timerId); state.timerId = null; } }
