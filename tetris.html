@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="description" content="Tetris LCD.">
+<meta property="og:title" content="♥ Tetris LCD ♥">
+<meta property="og:description" content="Para os viciados de plantão!">
+<meta property="og:type" content="website">
+<title>Tetris LCD</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧱</text></svg>">
+<link rel="stylesheet" href="css/style.css">
+<style>
+*{box-sizing:border-box;user-select:none}
+body{
+    margin:0;min-height:100vh;display:flex;justify-content:center;align-items:center;
+    background:#20233a !important;
+    font-family:"Courier New",monospace !important;color:#252d12;
+}
+.btn-voltar { position: absolute; top: 20px; left: 20px; background: #ffb703; border: 3px outset #fff; padding: 10px 20px; font-weight: bold; color: #4b0082; font-size: 15px; cursor: pointer; font-family: Arial, sans-serif; text-decoration: none; display: inline-block; z-index: 1000; }
+.btn-voltar:hover { background: #ff6a00; color: #fff; }
+.btn-voltar:active { border: 3px inset #fff; }
+@media (max-width: 600px) { .btn-voltar { top: 10px; left: 10px; padding: 8px 12px; font-size: 13px; } }
+.phone{
+    width:min(720px,96vw);padding:28px 24px 32px;
+    background:linear-gradient(135deg,#4c5074,#272a49 48%,#181a31);
+    border:2px solid #111326;border-radius:42px !important;
+    box-shadow:inset 4px 4px 9px #ffffff20,inset -8px -10px 15px #0008,0 30px 70px #0009;
+    z-index: 10; margin-bottom: 80px;
+}
+.logo{ width:max-content;margin:0 auto 20px;padding:2px 10px; background:#242740;border:2px solid #111326;color:#c9ccda; font:bold 22px Arial;letter-spacing:2px; }
+.screen-frame{padding:12px;background:#151827;border-radius:20px !important;box-shadow:inset 0 5px 10px #000a}
+.screen{ position:relative;background:#aab98a;border:3px solid #505d35; border-radius:4px !important;padding:12px;display:grid; grid-template-columns:1fr 145px;gap:10px; box-shadow:inset 0 0 25px #42501d44;overflow:hidden; }
+.screen:after{ content:"";position:absolute;inset:0;pointer-events:none; background:repeating-linear-gradient(to bottom,#27330b0b 0,#27330b0b 1px,transparent 1px,transparent 4px); }
+#board{width:300px;height:400px;image-rendering:pixelated;display:block}
+.side{position:relative;z-index:2}
+.box-t{border:3px solid #53603a;margin-bottom:10px;padding:7px;background:#b8c59b;box-shadow:inset 0 0 0 2px #87966a}
+.label{font-size:15px;letter-spacing:2px}
+.value{font-size:22px;text-align:center;font-weight:bold;margin-top:4px}
+.next{height:120px;display:flex;align-items:center;justify-content:center}
+.controls{margin-top:22px;display:flex;justify-content:center;gap:16px}
+button{ border:2px solid #13152a;border-radius:50% !important;background:linear-gradient(#dfe1ee,#858aa8); color:#3e705e;font-weight:bold;cursor:pointer;box-shadow:inset 0 3px 4px #fff8,0 4px 5px #0008; touch-action: manipulation; outline: none; }
+button:active{transform:translateY(3px); border: 2px solid #13152a;}
+.main{width:105px;height:45px;border-radius:50% !important}
+.sidebtn{width:52px;height:45px}
+.keys{margin-top:20px;display:grid;grid-template-columns:repeat(3,65px);gap:10px;justify-content:center}
+.key{height:45px; border-radius: 50% !important;}
+.key.up{grid-column:2}.key.left{grid-column:1;grid-row:2}.key.down{grid-column:2;grid-row:2}.key.right{grid-column:3;grid-row:2}
+.message{position:absolute;inset:0;background:#aab98aee;z-index:5;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center}
+.message.hidden{display:none}
+.message h2{font-size:27px;margin:0 0 10px;letter-spacing:3px; color:#252d12; text-shadow:none; border:none; background:transparent;}
+.message p{font-size:13px;line-height:1.6;margin:0; color:#252d12;}
+.footer{text-align:center;margin-top:16px;color:#9094ae;font-size:10px;letter-spacing:2px}
+@media(max-width:600px){
+    .screen{grid-template-columns:1fr;justify-items:center}
+    #board{width:270px;height:360px}
+    .side{width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .box-t{margin:0}.next{height:90px}
+}
+</style>
+<script src="js/geral.js" defer></script>
+</head>
+<body>
+<a href="jogos.html" class="btn-voltar">🔙 Voltar</a>
+
+<div class="phone">
+    <div class="logo">TETRIS</div>
+    <div class="screen-frame">
+        <div class="screen">
+            <canvas id="board" width="300" height="400"></canvas>
+            <div class="side">
+                <div class="box-t">
+                    <div class="label">SCORE</div>
+                    <div class="value" id="score">0000</div>
+                </div>
+                <div class="box-t">
+                    <div class="label">LEVEL</div>
+                    <div class="value" id="level">1</div>
+                </div>
+                <div class="box-t">
+                    <div class="label">LINES</div>
+                    <div class="value" id="lines">0</div>
+                </div>
+                <div class="box-t next">
+                    <canvas id="next" width="110" height="80"></canvas>
+                </div>
+            </div>
+            <div id="message" class="message">
+                <h2>TETRIS</h2>
+                <p>PRESSIONE<br>ENTER PARA JOGAR</p>
+            </div>
+        </div>
+    </div>
+    <div class="controls">
+        <button class="sidebtn" id="pause">II</button>
+        <button class="main" id="start">ENTER</button>
+        <button class="sidebtn" id="reset">↻</button>
+    </div>
+    <div class="keys">
+        <button class="key up" data-key="up">▲</button>
+        <button class="key left" data-key="left">◀</button>
+        <button class="key down" data-key="down">▼</button>
+        <button class="key right" data-key="right">▶</button>
+    </div>
+    <div class="footer">LCD TETRIS • 1990s STYLE</div>
+</div>
+
+<script>
+"use strict";
+const canvas=document.getElementById("board"); const ctx=canvas.getContext("2d"); const nextCanvas=document.getElementById("next"); const nextCtx=nextCanvas.getContext("2d");
+const scoreEl=document.getElementById("score"); const levelEl=document.getElementById("level"); const linesEl=document.getElementById("lines"); const message=document.getElementById("message");
+const COLS=10, ROWS=20, CELL=20; const EMPTY=0;
+const COLORS={ 1:"#29330b", 2:"#29330b", 3:"#29330b", 4:"#29330b", 5:"#29330b", 6:"#29330b", 7:"#29330b" };
+const SHAPES={ I:[[1,1,1,1]], O:[[1,1],[1,1]], T:[[0,1,0],[1,1,1]], L:[[1,0,0],[1,1,1]], J:[[0,0,1],[1,1,1]], S:[[0,1,1],[1,1,0]], Z:[[1,1,0],[0,1,1]] };
+const TYPES=Object.keys(SHAPES);
+let board,piece,nextPiece; let score=0,lines=0,level=1; let running=false,paused=false; let dropTimer=null,lastDrop=0;
+
+function cloneMatrix(m){return m.map(r=>r.slice())}
+function randomPiece(){ const type=TYPES[Math.floor(Math.random()*TYPES.length)]; return { type, matrix:cloneMatrix(SHAPES[type]), x:Math.floor((COLS-SHAPES[type][0].length)/2), y:0 }; }
+function resetBoard(){ board=Array.from({length:ROWS},()=>Array(COLS).fill(EMPTY)); }
+function startGame(){ stopLoop(); resetBoard(); score=0;lines=0;level=1; piece=randomPiece(); nextPiece=randomPiece(); running=true;paused=false; hideMessage(); updateHUD(); draw(); startLoop(); }
+function startLoop(){ stopLoop(); lastDrop=performance.now(); dropTimer=requestAnimationFrame(loop); }
+function stopLoop(){ if(dropTimer!==null){ cancelAnimationFrame(dropTimer); dropTimer=null; } }
+function loop(time){ if(!running){return} if(!paused){ const interval=Math.max(90,700-(level-1)*55); if(time-lastDrop>=interval){ softDrop(); lastDrop=time; } draw(); } dropTimer=requestAnimationFrame(loop); }
+function collide(p,ox=0,oy=0,matrix=p.matrix){ for(let y=0;y<matrix.length;y++){ for(let x=0;x<matrix[y].length;x++){ if(!matrix[y][x])continue; const nx=p.x+x+ox,ny=p.y+y+oy; if(nx<0||nx>=COLS||ny>=ROWS)return true; if(ny>=0&&board[ny][nx])return true; } } return false; }
+function merge(){ for(let y=0;y<piece.matrix.length;y++){ for(let x=0;x<piece.matrix[y].length;x++){ if(piece.matrix[y][x]){ const py=piece.y+y,px=piece.x+x; if(py>=0)board[py][px]=1; } } } }
+function clearLines(){ let cleared=0; for(let y=ROWS-1;y>=0;y--){ if(board[y].every(v=>v!==EMPTY)){ board.splice(y,1); board.unshift(Array(COLS).fill(EMPTY)); cleared++;y++; } } if(!cleared)return; lines+=cleared; const points=[0,40,100,300,1200][cleared]||1200; score+=points*level; level=Math.floor(lines/10)+1; updateHUD(); }
+function spawn(){ piece=nextPiece; piece.x=Math.floor((COLS-piece.matrix[0].length)/2); piece.y=0; nextPiece=randomPiece(); if(collide(piece)){ gameOver(); } }
+function lockPiece(){ merge(); clearLines(); spawn(); }
+function softDrop(){ if(!running||paused)return; if(!collide(piece,0,1)){ piece.y++; score+=1; }else{ lockPiece(); } updateHUD(); }
+function hardDrop(){ if(!running||paused)return; let distance=0; while(!collide(piece,0,1)){ piece.y++;distance++; } score+=distance*2; lockPiece(); updateHUD(); }
+function move(dx){ if(!running||paused)return; if(!collide(piece,dx,0)){ piece.x+=dx; } }
+function rotate(){ if(!running||paused)return; const old=piece.matrix; const rotated=old[0].map((_,i)=>old.map(row=>row[i]).reverse()); const tests=[0,-1,1,-2,2]; for(const offset of tests){ if(!collide(piece,offset,0,rotated)){ piece.matrix=rotated; piece.x+=offset; return; } } }
+function togglePause(){ if(!running)return; paused=!paused; if(paused){ showMessage("PAUSE","PRESSIONE PAUSE<br>PARA CONTINUAR"); }else hideMessage(); }
+function gameOver(){ running=false; paused=false; stopLoop(); showMessage("GAME OVER",`SCORE ${String(score).padStart(4,"0")}<br>PRESSIONE ENTER`); }
+function updateHUD(){ scoreEl.textContent=String(score).padStart(4,"0"); levelEl.textContent=String(level); linesEl.textContent=String(lines); }
+function showMessage(title,text){ message.innerHTML=`<h2 style="color:#252d12;background:transparent;text-shadow:none;border:none;margin:0 0 10px;padding:0;">${title}</h2><p style="color:#252d12;">${text}</p>`; message.classList.remove("hidden"); }
+function hideMessage(){ message.classList.add("hidden"); }
+function drawCell(context,x,y,size){ context.fillStyle=COLORS[1]; context.fillRect(x+1,y+1,size-2,size-2); context.fillStyle="#647047"; context.fillRect(x+2,y+2,size-4,2); context.fillStyle="#1d2708"; context.fillRect(x+2,y+size-4,size-4,2); }
+function draw(){ ctx.fillStyle="#aab98a"; ctx.fillRect(0,0,canvas.width,canvas.height); ctx.fillStyle="#87966a55"; for(let x=0;x<=COLS;x++)ctx.fillRect(x*CELL,0,1,canvas.height); for(let y=0;y<=ROWS;y++)ctx.fillRect(0,y*CELL,canvas.width,1); for(let y=0;y<ROWS;y++){ for(let x=0;x<COLS;x++){ if(board[y][x])drawCell(ctx,x*CELL,y*CELL,CELL); } } if(piece){ for(let y=0;y<piece.matrix.length;y++){ for(let x=0;x<piece.matrix[y].length;x++){ if(piece.matrix[y][x]){ drawCell(ctx,(piece.x+x)*CELL,(piece.y+y)*CELL,CELL); } } } } drawNext(); }
+function drawNext(){ nextCtx.fillStyle="#aab98a"; nextCtx.fillRect(0,0,nextCanvas.width,nextCanvas.height); const m=nextPiece?.matrix; if(!m)return; const size=18; const w=m[0].length*size; const h=m.length*size; const ox=(nextCanvas.width-w)/2; const oy=(nextCanvas.height-h)/2; for(let y=0;y<m.length;y++){ for(let x=0;x<m[y].length;x++){ if(m[y][x])drawCell(nextCtx,ox+x*size,oy+y*size,size); } } }
+function handleKey(key){ if(key==="Enter"){ if(!running)startGame(); else togglePause(); return; } if(key===" "){hardDrop();return} if(key==="ArrowLeft")move(-1); if(key==="ArrowRight")move(1); if(key==="ArrowDown")softDrop(); if(key==="ArrowUp")rotate(); }
+document.addEventListener("keydown",e=>{ if(["ArrowLeft","ArrowRight","ArrowDown","ArrowUp"," ","Enter"].includes(e.key)) e.preventDefault(); handleKey(e.key); });
+document.getElementById("start").onclick=()=>{ if(!running)startGame(); else if(paused)togglePause(); };
+document.getElementById("pause").onclick=togglePause; document.getElementById("reset").onclick=startGame;
+document.querySelectorAll("[data-key]").forEach(btn=>{ btn.addEventListener("pointerdown", (e) => { e.preventDefault(); const k=btn.dataset.key; if(k==="up")handleKey("ArrowUp"); if(k==="down")handleKey("ArrowDown"); if(k==="left")handleKey("ArrowLeft"); if(k==="right")handleKey("ArrowRight"); }); });
+resetBoard(); piece=randomPiece(); nextPiece=randomPiece(); updateHUD(); draw(); showMessage("TETRIS","PRESSIONE<br>ENTER PARA JOGAR");
+</script>
+</body>
+</html>

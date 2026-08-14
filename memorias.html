@@ -11,58 +11,138 @@
 <title>♥ Nossa História ♥</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💌</text></svg>">
 <link rel="stylesheet" href="css/style.css">
-<script src="js/geral.js" defer></script>
 </head>
 <body>
 <div class="topbar"></div>
-<nav class="topnav">
-  <a href="index.html">🏠 início</a>
-  <a href="memorias.html">💌 nossa história</a>
-  <a href="fotos.html">📸 fotos</a>
-  <a href="jogos.html">🎮 minijogos</a>
-  <a href="recados.html">💬 recados</a>
-</nav>
-
+<!-- NAV INJETADA -->
 <div class="container">
   <div class="site-title title-lg">💌 Nossa História 💌</div>
   <div class="marquee-fallback">
     <marquee scrollamount="5">✨ cada dia com você vira uma memória boa ✨</marquee>
   </div>
+  
+  <div class="box text-center">
+    <h3>Criar Nova Memória 💌</h3>
+    <input type="file" id="memoria-foto" accept="image/*">
+    <input type="text" id="memoria-data" placeholder="Título ou Data (ex: Nosso 1º encontro)">
+    <input type="text" id="memoria-desc" placeholder="Descreva esse momento especial...">
+    <div style="margin-top: 10px; margin-bottom: 10px; display: flex; justify-content: center; gap: 10px; align-items: center;">
+       <b>Cor do Quadro:</b>
+       <input type="color" id="memoria-cor" value="#ff6a00" style="width: 40px; height: 35px; cursor: pointer; border: 3px inset #4b0082;">
+    </div>
+    <button class="btn-retro" onclick="adicionarNovaMemoria()">Guardar Memória</button>
+  </div>
+
   <div class="box">
     <h2>Linha do Tempo</h2>
-    <div class="timeline-item timeline-destaque">
-      <img loading="lazy" src="images/pedido.jpeg" alt="dias antes do pedido">
-      <div><span class="timeline-data">dias antes de eu te pedir</span></div>
+    
+    <div id="timeline-container">
+      <!-- Memórias Estáticas Originais -->
+      <div class="timeline-item timeline-destaque">
+        <img loading="lazy" src="images/pedido.jpeg" alt="dias antes do pedido">
+        <div><span class="timeline-data">dias antes de eu te pedir</span></div>
+      </div>
+      <div class="timeline-item timeline-destaque">
+        <div><span class="timeline-data">★ 22/12/2025 ★</span></div>
+      </div>
+      <div class="timeline-item">
+        <img loading="lazy" src="images/daee.jpg" alt="a gente no DAEE">
+        <div><span class="timeline-data">um dos nossos encontros</span></div>
+      </div>
+      <div class="timeline-item">
+        <img loading="lazy" src="images/sesc.jpg" alt="a gente no SESC">
+        <div><span class="timeline-data">Sesc</span></div>
+      </div>
+      <div class="timeline-item">
+        <img loading="lazy" src="images/casal2022.jpg" alt="a gente no pôr do sol">
+        <div><span class="timeline-data">antiguera</span></div>
+      </div>
+      <div class="timeline-item timeline-destaque">
+        <div><span class="timeline-data">★ 21/05/2026 ★</span></div>
+      </div>
+      <div class="timeline-item">
+        <img loading="lazy" src="images/daee3.jpeg" alt="a gente no DAEE de novo">
+        <div><span class="timeline-data">mais um encontro no daee</span></div>
+      </div>
+      <div class="timeline-item">
+        <img loading="lazy" src="images/sesc3.jpeg" alt="tarde no sesc">
+        <div><span class="timeline-data">SESC 2</span></div>
+      </div>
+      <!-- As novas memórias dinâmicas vão aparecer aqui embaixo -->
     </div>
-    <div class="timeline-item timeline-destaque">
-      <div><span class="timeline-data">★ 18/12/2025 ★</span></div>
-    </div>
-    <div class="timeline-item">
-      <img loading="lazy" src="images/daee.jpg" alt="a gente no DAEE">
-      <div><span class="timeline-data">um dos nossos encontros</span></div>
-    </div>
-    <div class="timeline-item">
-      <img loading="lazy" src="images/sesc.jpg" alt="a gente no SESC">
-      <div><span class="timeline-data">Sesc 1</span></div>
-    </div>
-    <div class="timeline-item">
-      <img loading="lazy" src="images/casal2022.jpg" alt="a gente no pôr do sol">
-      <div><span class="timeline-data">antiguera</span></div>
-    </div>
-    <div class="timeline-item timeline-destaque">
-      <div><span class="timeline-data">★ 21/05/2026 ★</span></div>
-    </div>
-    <div class="timeline-item">
-      <img loading="lazy" src="images/daee3.jpeg" alt="a gente no DAEE de novo">
-      <div><span class="timeline-data">mais um encontro no daee</span></div>
-    </div>
-    <div class="timeline-item">
-      <img loading="lazy" src="images/sesc3.jpeg" alt="tarde no sesc">
-      <div><span class="timeline-data">SESC 2</span></div>
-    </div>
+
   </div>
-  <div class="box"><h2>mais memórias serão armazenadas aqui ✿</h2></div>
 </div>
 <div class="rodape">Feito por Alberto</div>
+<script src="js/geral.js"></script>
+
+<script>
+async function carregarMemorias() {
+  try {
+    const res = await fetch("api.php?action=get_memorias&_t=" + Date.now());
+    const memorias = await res.json();
+    const container = document.getElementById("timeline-container");
+    
+    memorias.forEach(m => {
+      const novaDiv = document.createElement("div");
+      novaDiv.className = "timeline-item timeline-destaque";
+      // Injeta a cor escolhida pelo usuário na borda
+      novaDiv.style.borderColor = m.cor; 
+      
+      novaDiv.innerHTML = `
+        <img loading="lazy" src="${m.url}" alt="${m.desc}" style="border-color: ${m.cor}">
+        <div>
+          <span class="timeline-data" style="background-color: ${m.cor}; color: #fff; text-shadow: 1px 1px 0px #000;">${m.dataText}</span>
+          <p style="margin-top: 8px; font-weight: bold; color: #2b0a3d;">${m.desc}</p>
+          <p style="font-size:10px; color:#999; margin-top:4px;">Por: ${m.email}</p>
+        </div>
+      `;
+      container.appendChild(novaDiv);
+    });
+  } catch(e) { console.log("Backend de memórias offline."); }
+}
+
+function adicionarNovaMemoria() {
+  const fileInput = document.getElementById("memoria-foto");
+  const dataText = document.getElementById("memoria-data").value.trim();
+  const desc = document.getElementById("memoria-desc").value.trim();
+  const cor = document.getElementById("memoria-cor").value;
+  
+  if(fileInput.files.length === 0) return alert("Por favor, escolha a foto da memória!");
+  if(!dataText || !desc) return alert("Por favor, preencha o título e a descrição!");
+  
+  const fotoFile = fileInput.files[0];
+  
+  garantirEmail(async (email) => {
+    const formData = new FormData();
+    formData.append("foto", fotoFile);
+    formData.append("dataText", dataText);
+    formData.append("desc", desc);
+    formData.append("cor", cor);
+    formData.append("email", email);
+
+    try {
+      const btn = document.querySelector("button.btn-retro");
+      const btnOriginalText = btn.innerText;
+      btn.innerText = "Carregando... ⏳";
+      
+      const res = await fetch("api.php?action=upload_memoria", { method: "POST", body: formData });
+      const resultado = await res.json();
+      
+      btn.innerText = btnOriginalText;
+      
+      if (resultado.status === "sucesso") { 
+          alert("Memória incrível guardada com sucesso! ✨"); 
+          setTimeout(() => location.reload(), 1500); 
+      } else { 
+          alert("Erro: " + (resultado.message || "Desconhecido")); 
+      }
+    } catch(e) { alert("Erro ao conectar com o servidor."); }
+  });
+}
+
+document.addEventListener("DOMContentLoaded", carregarMemorias);
+</script>
+
 </body>
 </html>

@@ -81,6 +81,46 @@ if ($action === 'get_recados') {
     } else {
         echo json_encode(["status" => "erro", "message" => "Nenhuma foto enviada ou formato corrompido."]);
     }
+} elseif ($action === 'get_memorias') {
+    echo get_data('memorias.json');
+} elseif ($action === 'upload_memoria') {
+    if (isset($_FILES['foto']) && $_FILES['foto']['error'] === UPLOAD_ERR_OK) {
+        $uploadDir = 'uploads/';
+        if (!is_dir($uploadDir)) mkdir($uploadDir, 0777, true);
+        
+        $fileInfo = pathinfo($_FILES['foto']['name']);
+        $ext = strtolower(isset($fileInfo['extension']) ? $fileInfo['extension'] : '');
+        $allowed = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+        
+        if (!in_array($ext, $allowed)) {
+             echo json_encode(["status" => "erro", "message" => "Apenas imagens (jpg, png, gif, webp) são permitidas."]);
+             exit;
+        }
+
+        $fileName = uniqid('memoria_') . '.' . $ext;
+        $targetPath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['foto']['tmp_name'], $targetPath)) {
+            $dataText = isset($_POST['dataText']) ? sanitize($_POST['dataText']) : '';
+            $desc = isset($_POST['desc']) ? sanitize($_POST['desc']) : '';
+            $cor = isset($_POST['cor']) ? sanitize($_POST['cor']) : '#ff6a00';
+            $email = isset($_POST['email']) ? sanitize($_POST['email']) : '';
+            
+            $novaMemoria = [
+                "url" => $targetPath,
+                "dataText" => $dataText,
+                "desc" => $desc,
+                "cor" => $cor,
+                "email" => $email
+            ];
+            save_data('memorias.json', $novaMemoria);
+            echo json_encode(["status" => "sucesso"]);
+        } else {
+            echo json_encode(["status" => "erro", "message" => "Erro ao salvar a foto no servidor."]);
+        }
+    } else {
+        echo json_encode(["status" => "erro", "message" => "Nenhuma foto enviada ou formato corrompido."]);
+    }
 } else {
     echo json_encode(["error" => "Ação inválida"]);
 }
