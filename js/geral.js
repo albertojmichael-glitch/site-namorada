@@ -11,11 +11,11 @@ function injectNav() {
     else { const t = document.querySelector(".topbar"); t && t.insertAdjacentHTML("afterend", `<nav class="topnav">${links}</nav>`); }
 }
 
-function setupGirando(){const e=document.querySelector(".img-girando");e&&e.addEventListener("click",()=>{alert("Você me deixa tontinho de amor! 💖💫")})}
+function setupGirando(){const e=document.querySelector(".img-girando");e&&e.addEventListener("click",()=>{alert("Ei para de tocar em mim machuca")})}
 
-// RESET DO APP
+
 window.limparDados = function() {
-    if(confirm("Tem certeza que deseja resetar o app? Você precisará colocar seu e-mail de novo para enviar memórias.")) {
+    if(confirm("Tem certeza que deseja resetar o app?")) {
         localStorage.clear();
         sessionStorage.clear();
         window.location.href = window.location.pathname + "?_t=" + Date.now();
@@ -25,7 +25,7 @@ window.limparDados = function() {
 window.tocarMusica = function(nome, src, capa) {
     sessionStorage.setItem("musicName", nome);
     sessionStorage.setItem("musicSrc", src);
-    sessionStorage.setItem("musicCapa", capa || "images/casal2022.jpg");
+    sessionStorage.setItem("musicCapa", capa || "images/celebrate.jpg");
     sessionStorage.setItem("musicTime", "0");
     sessionStorage.setItem("musicPlaying", "true");
     
@@ -37,14 +37,14 @@ window.tocarMusica = function(nome, src, capa) {
     if(audio && title && cover) {
         audio.src = src;
         title.textContent = "🎵 Tocando: " + nome + " 🎵";
-        cover.src = capa || "images/casal2022.jpg";
+        cover.src = capa || "images/celebrate.jpg";
         audio.play().then(() => {
             if(vinyl) vinyl.classList.remove("paused");
         }).catch(()=>{});
     }
 };
 
-// ANIMAÇÕES DE SUAVIZAÇÃO INJETADAS GLOBALMENTE
+
 function aplicarSuavizacao() {
     if(!document.getElementById("smooth-styles")){
         const s = document.createElement("style");
@@ -113,13 +113,13 @@ function injectMusicPlayer(){
         const playerHTML = `
         <div id="retro-player" class="${isMin ? 'minimized' : ''}">
             <div class="player-header">
-                <span>📻 Rádio do Casal</span>
+                <span>📻 Rádio </span>
                 <button class="min-btn" id="min-btn" title="Minimizar Rádio">${isMin ? '+' : '-'}</button>
             </div>
             <div class="player-body">
                 <div class="visuals">
                     <div class="vinyl spinning paused" id="vinyl-record"></div>
-                    <img class="album-cover" id="album-cover" src="${currentCapa}" onerror="this.src='images/casal2022.jpg'">
+                    <img class="album-cover" id="album-cover" src="${currentCapa}" onerror="this.src='images/celebrate.jpg'">
                 </div>
                 <div class="player-controls">
                     <marquee id="player-title" behavior="scroll" direction="left" scrollamount="4" style="width: 100%; color: #ff6a00; font-size: 13px; font-weight: bold; margin-bottom: 5px;">
