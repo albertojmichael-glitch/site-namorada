@@ -71,7 +71,7 @@ function aplicarSuavizacao() {
         document.head.appendChild(s);
     }
     
-    // Suaviza as imagens assim que carregam
+    
     document.addEventListener('load', function(e){
         if(e.target.tagName === 'IMG'){ e.target.style.opacity = 1; }
     }, true);
@@ -80,8 +80,8 @@ function aplicarSuavizacao() {
 function injectMusicPlayer(){
     if(!document.getElementById("retro-player")){
         let currentSrc = sessionStorage.getItem("musicSrc") || "musica.mp3";
-        let currentName = sessionStorage.getItem("musicName") || "Nossa Música Especial";
-        let currentCapa = sessionStorage.getItem("musicCapa") || "images/casal2022.jpg";
+        let currentName = sessionStorage.getItem("musicName") || "Celebrate";
+        let currentCapa = sessionStorage.getItem("musicCapa") || "images/celebrate.jpg";
         let isMin = sessionStorage.getItem("musicMin") === "true";
 
         if(!document.getElementById("player-styles")){
