@@ -13,10 +13,19 @@ function injectNav() {
 
 function setupGirando(){const e=document.querySelector(".img-girando");e&&e.addEventListener("click",()=>{alert("Você me deixa tontinho de amor! 💖💫")})}
 
+// RESET DO APP
+window.limparDados = function() {
+    if(confirm("Tem certeza que deseja resetar o app? Você precisará colocar seu e-mail de novo para enviar memórias.")) {
+        localStorage.clear();
+        sessionStorage.clear();
+        window.location.href = window.location.pathname + "?_t=" + Date.now();
+    }
+};
+
 window.tocarMusica = function(nome, src, capa) {
     sessionStorage.setItem("musicName", nome);
     sessionStorage.setItem("musicSrc", src);
-    sessionStorage.setItem("musicCapa", capa || "images/celebrate.jpg");
+    sessionStorage.setItem("musicCapa", capa || "images/casal2022.jpg");
     sessionStorage.setItem("musicTime", "0");
     sessionStorage.setItem("musicPlaying", "true");
     
@@ -28,18 +37,51 @@ window.tocarMusica = function(nome, src, capa) {
     if(audio && title && cover) {
         audio.src = src;
         title.textContent = "🎵 Tocando: " + nome + " 🎵";
-        cover.src = capa || "images/celebrate.jpg";
+        cover.src = capa || "images/casal2022.jpg";
         audio.play().then(() => {
             if(vinyl) vinyl.classList.remove("paused");
         }).catch(()=>{});
     }
 };
 
+// ANIMAÇÕES DE SUAVIZAÇÃO INJETADAS GLOBALMENTE
+function aplicarSuavizacao() {
+    if(!document.getElementById("smooth-styles")){
+        const s = document.createElement("style");
+        s.id = "smooth-styles";
+        s.innerHTML = `
+            html { scroll-behavior: smooth; }
+            .box, .timeline-item, .card-jogo { 
+                animation: fadeUp 0.6s cubic-bezier(0.25, 1, 0.5, 1) forwards; 
+                opacity: 0; 
+                transform: translateY(20px);
+            }
+            img { transition: opacity 0.5s ease-in-out; }
+            img[loading] { opacity: 0; }
+            
+            /* Staggering (fazer os itens aparecerem um de cada vez) */
+            .box:nth-child(1) { animation-delay: 0.1s; }
+            .box:nth-child(2) { animation-delay: 0.2s; }
+            .box:nth-child(3) { animation-delay: 0.3s; }
+            
+            @keyframes fadeUp {
+                to { opacity: 1; transform: translateY(0); }
+            }
+        `;
+        document.head.appendChild(s);
+    }
+    
+    // Suaviza as imagens assim que carregam
+    document.addEventListener('load', function(e){
+        if(e.target.tagName === 'IMG'){ e.target.style.opacity = 1; }
+    }, true);
+}
+
 function injectMusicPlayer(){
     if(!document.getElementById("retro-player")){
         let currentSrc = sessionStorage.getItem("musicSrc") || "musica.mp3";
-        let currentName = sessionStorage.getItem("musicName") || "Celebrate";
-        let currentCapa = sessionStorage.getItem("musicCapa") || "images/celebrate.jpg";
+        let currentName = sessionStorage.getItem("musicName") || "Nossa Música Especial";
+        let currentCapa = sessionStorage.getItem("musicCapa") || "images/casal2022.jpg";
         let isMin = sessionStorage.getItem("musicMin") === "true";
 
         if(!document.getElementById("player-styles")){
@@ -50,23 +92,18 @@ function injectMusicPlayer(){
                 .player-header { display: flex; justify-content: space-between; align-items: center; font-weight: bold; color: #4b0082; margin-bottom: 8px; font-size: 14px; border-bottom: 2px dashed #9b5de5; padding-bottom: 4px; }
                 .min-btn { background: #ff6fb0; border: 2px outset #ffb6e6; color: white; cursor: pointer; font-weight: bold; font-size: 16px; padding: 0px 8px; border-radius: 0; line-height: 1; }
                 .min-btn:active { border: 2px inset #ffb6e6; }
-                
                 .player-body { display: flex; align-items: center; gap: 15px; }
                 #retro-player.minimized .player-body { display: none; }
                 #retro-player.minimized { padding-bottom: 5px; }
                 #retro-player.minimized .player-header { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
-                
-                /* Disco de Vinil e Capa do Álbum */
                 .visuals { position: relative; width: 85px; height: 55px; flex-shrink: 0; }
                 .album-cover { width: 55px; height: 55px; position: absolute; left: 0; top: 0; z-index: 2; border: 2px solid #4b0082; object-fit: cover; box-shadow: 2px 2px 4px rgba(0,0,0,0.4); background: #9b5de5; }
                 .vinyl { width: 53px; height: 53px; border-radius: 50% !important; background: repeating-radial-gradient(#111, #111 2px, #333 3px, #333 4px); border: 1px solid #000; position: absolute; left: 25px; top: 1px; z-index: 1; display: flex; justify-content: center; align-items: center; box-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
                 .vinyl::after { content: ''; width: 18px; height: 18px; background: #ff6a00; border-radius: 50% !important; border: 2px solid #2b0a3d; }
                 .vinyl::before { content: ''; width: 5px; height: 5px; background: #fff; border-radius: 50% !important; position: absolute; z-index: 10; }
-                
                 .spinning { animation: spin 3s linear infinite; }
                 .paused { animation-play-state: paused; }
                 @keyframes spin { 100% { transform: rotate(360deg); } }
-                
                 .player-controls { flex-grow: 1; min-width: 0; }
                 .player-controls audio { height: 30px; width: 100%; outline: none; }
             `;
@@ -76,7 +113,7 @@ function injectMusicPlayer(){
         const playerHTML = `
         <div id="retro-player" class="${isMin ? 'minimized' : ''}">
             <div class="player-header">
-                <span>📻 Rádio</span>
+                <span>📻 Rádio do Casal</span>
                 <button class="min-btn" id="min-btn" title="Minimizar Rádio">${isMin ? '+' : '-'}</button>
             </div>
             <div class="player-body">
@@ -105,36 +142,28 @@ function injectMusicPlayer(){
         
         if(savedTime) audio.currentTime = parseFloat(savedTime);
         if(isPlaying === "true") {
-            audio.play().then(() => {
-                vinyl.classList.remove("paused");
-            }).catch(()=>{});
+            audio.play().then(() => { vinyl.classList.remove("paused"); }).catch(()=>{});
         }
 
-        audio.addEventListener("timeupdate", () => {
-            sessionStorage.setItem("musicTime", audio.currentTime);
-        });
-        audio.addEventListener("play", () => {
-            sessionStorage.setItem("musicPlaying", "true");
-            vinyl.classList.remove("paused");
-        });
-        audio.addEventListener("pause", () => {
-            sessionStorage.setItem("musicPlaying", "false");
-            vinyl.classList.add("paused");
-        });
+        audio.addEventListener("timeupdate", () => { sessionStorage.setItem("musicTime", audio.currentTime); });
+        audio.addEventListener("play", () => { sessionStorage.setItem("musicPlaying", "true"); vinyl.classList.remove("paused"); });
+        audio.addEventListener("pause", () => { sessionStorage.setItem("musicPlaying", "false"); vinyl.classList.add("paused"); });
 
         minBtn.addEventListener("click", () => {
-            const isCurrentlyMin = player.classList.contains("minimized");
-            if (isCurrentlyMin) {
-                player.classList.remove("minimized");
-                minBtn.textContent = "-";
-                sessionStorage.setItem("musicMin", "false");
+            if (player.classList.contains("minimized")) {
+                player.classList.remove("minimized"); minBtn.textContent = "-"; sessionStorage.setItem("musicMin", "false");
             } else {
-                player.classList.add("minimized");
-                minBtn.textContent = "+";
-                sessionStorage.setItem("musicMin", "true");
+                player.classList.add("minimized"); minBtn.textContent = "+"; sessionStorage.setItem("musicMin", "true");
             }
         });
     }
 }
 
-document.addEventListener("DOMContentLoaded",function(){injectNav(),atualizarContador(),iniciarCoracoesClique(),setupGirando(),injectMusicPlayer()});
+document.addEventListener("DOMContentLoaded",function(){
+    aplicarSuavizacao();
+    injectNav();
+    atualizarContador();
+    iniciarCoracoesClique();
+    setupGirando();
+    injectMusicPlayer();
+});

@@ -37,7 +37,6 @@
     <h2>Linha do Tempo</h2>
     
     <div id="timeline-container">
-      <!-- Memórias Estáticas Originais -->
       <div class="timeline-item timeline-destaque">
         <img loading="lazy" src="images/pedido.jpeg" alt="dias antes do pedido">
         <div><span class="timeline-data">dias antes de eu te pedir</span></div>
@@ -68,15 +67,43 @@
         <img loading="lazy" src="images/sesc3.jpeg" alt="tarde no sesc">
         <div><span class="timeline-data">SESC 2</span></div>
       </div>
-      <!-- As novas memórias dinâmicas vão aparecer aqui embaixo -->
     </div>
-
   </div>
 </div>
-<div class="rodape">Feito por Alberto</div>
+<div class="rodape">
+  Feito por Alberto ♥<br><br>
+  <a href="#" onclick="limparDados()" style="color: #ffb6e6; font-size: 10px; text-decoration: none;">[ Resetar App ]</a>
+</div>
 <script src="js/geral.js"></script>
 
 <script>
+// FUNÇÃO MÁGICA: Comprime a foto no celular antes de enviar pro banco
+function comprimirImagem(file, callback) {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = function(event) {
+    const img = new Image();
+    img.src = event.target.result;
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const MAX_WIDTH = 800; // Reduz o tamanho para uma resolução otimizada pra web
+      let scale = 1;
+      if (img.width > MAX_WIDTH) { scale = MAX_WIDTH / img.width; }
+      
+      canvas.width = img.width * scale;
+      canvas.height = img.height * scale;
+      
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      
+      // Transforma de volta em arquivo com 70% da qualidade original
+      canvas.toBlob((blob) => {
+        callback(new File([blob], file.name, { type: 'image/jpeg' }));
+      }, 'image/jpeg', 0.7);
+    }
+  }
+}
+
 async function carregarMemorias() {
   try {
     const res = await fetch("api.php?action=get_memorias&_t=" + Date.now());
@@ -86,7 +113,6 @@ async function carregarMemorias() {
     memorias.forEach(m => {
       const novaDiv = document.createElement("div");
       novaDiv.className = "timeline-item timeline-destaque";
-      // Injeta a cor escolhida pelo usuário na borda
       novaDiv.style.borderColor = m.cor; 
       
       novaDiv.innerHTML = `
@@ -99,7 +125,7 @@ async function carregarMemorias() {
       `;
       container.appendChild(novaDiv);
     });
-  } catch(e) { console.log("Backend de memórias offline."); }
+  } catch(e) { console.log("Backend offline."); }
 }
 
 function adicionarNovaMemoria() {
@@ -111,38 +137,43 @@ function adicionarNovaMemoria() {
   if(fileInput.files.length === 0) return alert("Por favor, escolha a foto da memória!");
   if(!dataText || !desc) return alert("Por favor, preencha o título e a descrição!");
   
-  const fotoFile = fileInput.files[0];
+  const fotoFileOriginal = fileInput.files[0];
+  const btn = document.querySelector("button.btn-retro");
+  const btnOriginalText = btn.innerText;
   
-  garantirEmail(async (email) => {
-    const formData = new FormData();
-    formData.append("foto", fotoFile);
-    formData.append("dataText", dataText);
-    formData.append("desc", desc);
-    formData.append("cor", cor);
-    formData.append("email", email);
+  garantirEmail((email) => {
+    btn.innerText = "Preparando foto... ⏳";
+    
+    // COMPRIME A IMAGEM AQUI
+    comprimirImagem(fotoFileOriginal, async (fotoComprimida) => {
+        btn.innerText = "Enviando... 🚀";
+        const formData = new FormData();
+        formData.append("foto", fotoComprimida);
+        formData.append("dataText", dataText);
+        formData.append("desc", desc);
+        formData.append("cor", cor);
+        formData.append("email", email);
 
-    try {
-      const btn = document.querySelector("button.btn-retro");
-      const btnOriginalText = btn.innerText;
-      btn.innerText = "Carregando... ⏳";
-      
-      const res = await fetch("api.php?action=upload_memoria", { method: "POST", body: formData });
-      const resultado = await res.json();
-      
-      btn.innerText = btnOriginalText;
-      
-      if (resultado.status === "sucesso") { 
-          alert("Memória incrível guardada com sucesso! ✨"); 
-          setTimeout(() => location.reload(), 1500); 
-      } else { 
-          alert("Erro: " + (resultado.message || "Desconhecido")); 
-      }
-    } catch(e) { alert("Erro ao conectar com o servidor."); }
+        try {
+          const res = await fetch("api.php?action=upload_memoria", { method: "POST", body: formData });
+          const resultado = await res.json();
+          
+          btn.innerText = btnOriginalText;
+          if (resultado.status === "sucesso") { 
+              alert("Memória incrível guardada com sucesso! ✨"); 
+              setTimeout(() => location.reload(), 1500); 
+          } else { 
+              alert("Erro: " + (resultado.message || "Desconhecido")); 
+          }
+        } catch(e) { 
+            alert("Erro ao conectar com o servidor."); 
+            btn.innerText = btnOriginalText;
+        }
+    });
   });
 }
 
 document.addEventListener("DOMContentLoaded", carregarMemorias);
 </script>
-
 </body>
 </html>
